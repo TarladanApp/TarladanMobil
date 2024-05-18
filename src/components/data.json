@@ -1,0 +1,73 @@
+[
+    {
+        "u_id": 0,
+        "name": "Çilek",
+        "price": 24.99,
+        "imageUrl": "https://cdn.yemek.com/mncrop/940/625/uploads/2015/04/cilek.jpg"
+    },
+    {
+        "u_id": 1,
+        "name": "Salatalık",
+        "price": 24.99, 
+        "imageUrl": "https://www.bahcetohum.com/img/products/cengelkoy-salatalik--bahcetohum-_21.03.2021_8b99dd1.jpg"
+    },
+    {
+        "u_id": 2,
+        "name": "Erik",
+        "price": 24.99, 
+        "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDfRqyAGTlutAL1WY4xxIcH-8ZEvLgXY8aP1Hai5mgPw&s"},
+        {
+        "u_id": 3,
+        "name": "Çeri Domates",
+        "price": 24.99, 
+        "imageUrl": "https://cdn.yemek.com/mncrop/940/625/uploads/2015/10/ceri-domates.jpg"
+    },
+    {
+        "u_id": 4,
+        "name": "Domates",
+        "price": 24.99, 
+        "imageUrl": "https://cdn1.ntv.com.tr/gorsel/H5RNhrjyyUuXareBPnnPBw.jpg?width=952&height=540&mode=both&scale=both"
+    },
+    {
+        "u_id": 5,
+        "name": "Havuç",
+        "price": 24.99, 
+        "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtQUkkK1LA26PQVbGdJ-F1D_z8RXW2wKQVvuqk1IkyYg&s"
+    },
+    {
+        "u_id": 6,
+        "name": "Yeşil Biber",
+        "price": 24.99, 
+        "imageUrl": "https://i.lezzet.com.tr/images-800x600/yesil-biberin-faydalari-nelerdir--bs64-0884e1a7-9ed3-4f20-845a-2e69770b8bff"
+        },
+        {
+        "u_id": 7,
+        "name": "Acı Biber",
+        "price": 24.99, 
+        "imageUrl": "https://trthaberstatic.cdn.wp.trt.com.tr/resimler/2102000/aci-biber-gety-2102436.jpg"
+    },
+    {
+        "u_id": 8,
+        "name": "Paprika",
+        "price": 24.99, 
+        "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTPYp7Mbjb5YkFG2sLFkO9S0te4CDTO8FWvby1UBMTXA&s"
+    },
+    {
+        "u_id": 9,
+        "name": "Bal Kabağı",
+        "price": 24.99, 
+        "imageUrl": "https://www.hendexfood.com/images/urunler/Turuncu-Mini-Bal-Kabagi-resim-269.jpg"
+    },
+    {
+        "u_id": 10,
+        "name": "Brokoli",
+        "price": 24.99, 
+        "imageUrl": "https://egetelgrafcom.teimg.com/crop/1280x720/egetelgraf-com/uploads/2023/09/sagliga-yesil-bir-dokunus-brokoli-ve-sagliga-faydalari.webp"
+        },
+        {
+        "u_id": 11,
+        "name": "Soğan",
+        "price": 24.99, 
+        "imageUrl": "https://image.milimaj.com/i/milliyet/75/869x477/5fd09c6255428015306fa549.jpg"
+    }
+]
