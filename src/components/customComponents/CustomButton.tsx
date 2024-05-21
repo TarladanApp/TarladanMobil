@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, { useState } from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 
@@ -66,7 +67,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginRight: 20,
-    borderRadius:15
   },
   buttonText: {
     color: "black",

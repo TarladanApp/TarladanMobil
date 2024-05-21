@@ -1,8 +1,9 @@
-import React from "react";
-import { Dimensions, FlatList, Image, StyleSheet, Text, View } from "react-native"
-import data from "../data.json"
-import Produce from "../customComponents/Produce"
-import CustomButton from "../customComponents/CustomButton";
+/* eslint-disable prettier/prettier */
+import React from 'react';
+import { Dimensions, FlatList, Image, StyleSheet, Text, View } from 'react-native'
+import data from '../data.json'
+import Produce from '../customComponents/Produce'
+import CustomButton from '../customComponents/CustomButton';
 
 function App (){
     const renderItem = ({ item }) => {
@@ -11,7 +12,7 @@ function App (){
 
     return(
         <View style={styles.container}>
-            <View style={{alignItems:"center",justifyContent:"center",paddingTop:50}}>
+            <View style={{alignItems:"center",justifyContent:'center',paddingTop:50}}>
                 <Image style={{ width: Dimensions.get("window").width/1.1, 
                 height: Dimensions.get("window").height/6,borderRadius:10}}
                 source = {{uri:"https://ideacdn.net/idea/ef/27/myassets/blogs/1.JPG?revision=1586724702"}}></Image>
