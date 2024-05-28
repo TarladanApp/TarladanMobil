@@ -156,12 +156,10 @@ const SignInScreen = ({
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Üye Ol" component={HomeScreen} />
-        <Stack.Screen name="Üyeyim" component={SignInScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator>
+      <Stack.Screen name="Üye Ol" component={HomeScreen} />
+      <Stack.Screen name="Üyeyim" component={SignInScreen} />
+    </Stack.Navigator>
   );
 };
 

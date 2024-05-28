@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import ProductDetailsItem from '../customComponents/ProductDetailsItem';
-import Order from "./Order"
+import Order from "./Splash"
 
 const ProductDetails = () => {
   const navigation = useNavigation();
