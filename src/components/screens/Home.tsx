@@ -33,6 +33,7 @@ function Home({ navigation }) {
         renderItem={renderItem}
         numColumns={4}
       />
+
     </View>
   );
 }
@@ -50,5 +51,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold"
   }
 });
-
 export default Home;
