@@ -3,15 +3,17 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image} from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import { ScrollView } from 'react-native-gesture-handler';
+import { useFocusEffect } from '@react-navigation/native';
 
 const PaymentScreen = ({ navigation }) => {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      title: "Sepetim",
-      headerTitleAlign: 'center',
+      title: "Deniz Ev",
+      headerTitleAlign: 'flex-start',
       headerTitleStyle: {
         color: 'white',
+        fontSize: 14,
       },
       headerTintColor: 'white',
       headerStyle: {
@@ -27,6 +29,7 @@ const PaymentScreen = ({ navigation }) => {
       ),
     });
   }, [navigation]);
+
   
   const [showCoupons, setShowCoupons] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState('');
