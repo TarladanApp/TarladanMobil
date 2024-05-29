@@ -264,6 +264,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
   },
+  icon:{
+    width:20,
+    height:20,
+    tintColor:'#2DB300',
+    opacity:1,
+  },
 });
 
 export default CartScreen;
