@@ -1,15 +1,19 @@
-import { useNavigation } from '@react-navigation/native';
+/* eslint-disable no-trailing-spaces */
+/* eslint-disable prettier/prettier */
+// CartScreen.js
+
+import { ParamListBase, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native';
 
 const CartScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
       title: "Sepetim",
       headerTitleAlign: 'center',
-      tabBarVisible:false,
       headerTitleStyle: {
         color: 'white',
       },
@@ -69,42 +73,40 @@ const CartScreen = () => {
     setCartItems([]);
   };
 
-
   const renderCartItem = ({ item }) => (
     <View style={styles.item}>
-         <View style={styles.content}>
-      <Image source={item.image} style={styles.image} />
-      <View style={styles.details}>
-        <Text style={styles.cartItemName}>{item.name}</Text>
-        <Text style={styles.cartItemFarm}>1 kg</Text>
-        <Text style={styles.cartItemFarm}>{item.farm}</Text>
-        <Text style={styles.cartItemPrice}>₺{item.price}</Text>
-        <View style={styles.actions}>
-          <View style={styles.quantityContainer}>
-            <TouchableOpacity onPress={() => handleRemoveFromCart(item.id)} style={styles.button}>
-            <Image source={require('../images/rubbish.png')} style={styles.icon} />
-            </TouchableOpacity>
-            <Text style={styles.quantityText}>{item.quantity}</Text>
-            <TouchableOpacity onPress={() => handleAddToCart(item)} style={styles.button}>
-              <Text style={styles.quantityText}>+</Text>
-            </TouchableOpacity>  
+      <View style={styles.content}>
+        <Image source={item.image} style={styles.image} />
+        <View style={styles.details}>
+          <Text style={styles.cartItemName}>{item.name}</Text>
+          <Text style={styles.cartItemFarm}>1 kg</Text>
+          <Text style={styles.cartItemFarm}>{item.farm}</Text>
+          <Text style={styles.cartItemPrice}>₺{item.price}</Text>
+          <View style={styles.actions}>
+            <View style={styles.quantityContainer}>
+              <TouchableOpacity onPress={() => handleRemoveFromCart(item.id)} style={styles.button}>
+                <Image source={require('../images/rubbish.png')} style={styles.icon} />
+              </TouchableOpacity>
+              <Text style={styles.quantityText}>{item.quantity}</Text>
+              <TouchableOpacity onPress={() => handleAddToCart(item)} style={styles.button}>
+                <Text style={styles.quantityText}>+</Text>
+              </TouchableOpacity>  
+            </View>
           </View>
         </View>
       </View>
     </View>
-    </View>
-   
   );
 
   const renderRecommendedItem = ({ item }) => (
-     <View style={styles.recommendedItem}>
-    <Image source={item.image} style={styles.recommendedItemImage} />
-    <TouchableOpacity onPress={() => handleAddToCart(item)} style={styles.addButton}>
-      <Text style={styles.addButtonText}>+</Text>
-    </TouchableOpacity>
-    <Text style={styles.recommendedItemName}>{item.name}</Text>
-    <Text style={styles.recommendedItemPrice}>₺{item.price}/kg</Text>
-  </View>
+    <View style={styles.recommendedItem}>
+      <Image source={item.image} style={styles.recommendedItemImage} />
+      <TouchableOpacity onPress={() => handleAddToCart(item)} style={styles.addButton}>
+        <Text style={styles.addButtonText}>+</Text>
+      </TouchableOpacity>
+      <Text style={styles.recommendedItemName}>{item.name}</Text>
+      <Text style={styles.recommendedItemPrice}>₺{item.price}/kg</Text>
+    </View>
   );
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
@@ -127,16 +129,19 @@ const CartScreen = () => {
           </>
         )}
       />
-       <TouchableOpacity style={styles.checkoutButton}>
-              <Text style={styles.checkoutButtonText}>Devam</Text>
-              <Text style={styles.totalText}>₺{total}</Text>
-            </TouchableOpacity>
+      <TouchableOpacity 
+        style={styles.checkoutButton} 
+        onPress={() => navigation.navigate('PaymentScreen')}
+      >
+        <Text style={styles.checkoutButtonText}>Devam</Text>
+        <Text style={styles.totalText}>₺{total}</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-item: {
+  item: {
     padding: 1,
     marginVertical: 6,
     marginHorizontal: 0,
@@ -144,17 +149,11 @@ item: {
     borderBottomWidth: 1,
     borderRadius: 5,
     position: 'relative',
-    },
+  },
   container: {
     flex: 1,
     backgroundColor: 'white',
-    padding:10,
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 10,
+    padding: 10,
   },
   actions: {
     flexDirection: 'row',
@@ -191,24 +190,11 @@ item: {
     fontSize: 16,
     color: '#2DB300',
   },
-  cartItemActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  deleteButton: {
-    marginRight: 10,
-  },
-  icon: {
-    width: 20,
-    height: 20,
-    tintColor: '#2DB300',
-  },
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  quantityButton: {
+  button: {
     backgroundColor: '#fff',
     borderColor: '#ccc',
     borderWidth: 1,
@@ -251,44 +237,32 @@ item: {
     borderColor: "gray",
     borderWidth: 1,
     borderRadius: 5,
-    width: 25, // Butonun boyutunu arttırdım
+    width: 25,
     height: 25,
-    justifyContent: "center", // İçeriği ortalamak için
+    justifyContent: "center",
     alignItems: "center",
   },
   addButtonText: {
-    color: '#2DB300',
-    fontSize: 16, // Yazının boyutunu arttırdım
-    textAlign: "center",
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   checkoutButton: {
-    backgroundColor: '#2DB300',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#2DB300',
     padding: 15,
-    margin: 10,
-    borderRadius: 10,
+    borderRadius: 5,
+    marginVertical: 10,
   },
   checkoutButtonText: {
     color: 'white',
     fontSize: 18,
+    fontWeight: 'bold',
   },
   totalText: {
     color: 'white',
     fontSize: 18,
-  },
-  button: {
-    backgroundColor: 'white',
-    width: 30,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 8,
-    borderColor: "gray",
-    borderWidth: 0.5,
-    marginRight: 5,
-    marginLeft:5
   },
 });
 

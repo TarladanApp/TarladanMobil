@@ -1,15 +1,17 @@
+/* eslint-disable prettier/prettier */
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from '@react-navigation/stack';
 import { Image } from "react-native";
-import Order from "./components/screens/Splash";
+//import Splash from "./components/screens/Splash";
 import Profile from "./components/screens/Profile";
 import Home from "./components/screens/Home";
 import ProductDetails from "./components/screens/ProductDetails"; // Ürün detayları sayfası
-import Cart from "./components/screens/Cart";
 import Login from "./components/screens/Login"
 import Splash from "./components/screens/Splash"
+import Payment from "./components/screens/Payment";
+import Cart from "./components/screens/Cart";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -19,6 +21,15 @@ const HomeStack = () => {
     <Stack.Navigator>
       <Stack.Screen name="HomeScreen" component={Home} options={{ headerShown: false }} />
       <Stack.Screen name="ProductDetails" component={ProductDetails}  />
+    </Stack.Navigator>
+  );
+};
+
+const CartStack = () =>{
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="CartScreen" component={Cart}/>
+      <Stack.Screen name="PaymentScreen" component={Payment}/>
     </Stack.Navigator>
   );
 };
@@ -53,11 +64,13 @@ const Router = () => {
         })}
       >
         <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Anasayfa', headerShown: false }} />
-        <Tab.Screen name="Cart" component={Cart} options={{ tabBarLabel: 'Sipariş Ver',headerShown:true}} />
+        <Tab.Screen name="Cart" component={CartStack} options={{ tabBarLabel: 'Sipariş Ver', headerShown: false }} />
         <Tab.Screen name="Profile" component={Splash} options={{ tabBarLabel: 'Hesabım', headerShown: false }} />
       </Tab.Navigator>
     </NavigationContainer>
   );
 };
+
+
 
 export default Router;
