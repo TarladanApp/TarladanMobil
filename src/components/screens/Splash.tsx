@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {View, Text, StyleSheet, Image, Pressable} from 'react-native';
 
@@ -42,7 +41,6 @@ function Splash() {
       </View>
     </View>
   );
-
 }
 
 const styles = StyleSheet.create({

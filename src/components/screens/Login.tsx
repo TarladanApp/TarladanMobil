@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
     NavigationContainer,
     NavigationProp,
@@ -144,7 +145,6 @@ const SignInScreen = ({
 
         <Text style={styles.footerTarladanText}>Tarla’dan</Text>
         <Text style={styles.footerText}>direkt evinize organik ve taze</Text>
-        
         <Text style={styles.footerSubText}>
           Üreticilerden günlük olarak toplanan taze ürünleri listeleyin ve hemen
           kapınıza gelsin.
@@ -154,7 +154,7 @@ const SignInScreen = ({
   );
 };
 
-const App = () => {
+const Login = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Üye Ol" component={HomeScreen} />
@@ -275,4 +275,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default Login;

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';

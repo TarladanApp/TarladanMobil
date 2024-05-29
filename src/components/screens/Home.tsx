@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React from "react";
 import { Dimensions, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import data from "../data.json";
