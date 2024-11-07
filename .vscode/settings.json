@@ -1,3 +1,9 @@
 {
-    "typescript.tsdk": "node_modules\\typescript\\lib"
+    "typescript.tsdk": "node_modules\\typescript\\lib",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.runtimes": [
+
+    ],
+    "java.configuration.detectJdksAtStart": true,
+    "FSharp.suggestGitignore": false
 }

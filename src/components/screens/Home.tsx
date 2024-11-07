@@ -1,12 +1,23 @@
 /* eslint-disable prettier/prettier */
 import React from "react";
 import { Dimensions, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import data from "../data.json";
-import Produce from "../customComponents/Produce";
 import CustomButton from "../customComponents/CustomButton";
+import Produce from "../customComponents/Produce";
+import data from "../data.json";
 
-function Home({ navigation }) {
-  const renderItem = ({ item }) => {
+interface Item {
+  u_id: number;
+  // Add other properties of the item here
+}
+
+import { NavigationProp } from '@react-navigation/native';
+
+interface HomeProps {
+  navigation: NavigationProp<any>;
+}
+
+function Home({ navigation }: HomeProps) {
+  const renderItem = ({ item }: { item: Item }) => {
     return (
       <TouchableOpacity onPress={() => navigation.navigate('ProductDetails', { product: item })}>
         <Produce produce={item}/>
