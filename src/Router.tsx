@@ -2,7 +2,7 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Image } from "react-native";
 //import Splash from "./components/screens/Splash";
 import Profile from "./components/screens/Profile";
@@ -14,7 +14,7 @@ import Payment from "./components/screens/Payment";
 import Cart from "./components/screens/Cart";
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 const HomeStack = () => {
   return (
@@ -65,7 +65,7 @@ const Router = () => {
       >
         <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Anasayfa', headerShown: false }} />
         <Tab.Screen name="Cart" component={CartStack} options={{ tabBarLabel: 'Sipariş Ver', headerShown: false }} />
-        <Tab.Screen name="Profile" component={Splash} options={{ tabBarLabel: 'Hesabım', headerShown: false }} />
+        <Tab.Screen name="Profile" component={Login} options={{ tabBarLabel: 'Hesabım', headerShown: false }} />
       </Tab.Navigator>
     </NavigationContainer>
   );
