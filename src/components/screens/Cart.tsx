@@ -2,13 +2,33 @@
 /* eslint-disable prettier/prettier */
 // CartScreen.js
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native';
+import React, { useEffect } from 'react';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useCart } from '../../context/CartContext';
+
+interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  farm: string;
+  image: any;
+}
+
+interface RecommendedItem {
+  id: number;
+  name: string;
+  price: number;
+  image: any;
+  farm: string;
+}
 
 const CartScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
+  const { cartItems, updateCart } = useCart();
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -40,40 +60,97 @@ const CartScreen = () => {
     });
   }, [navigation]);
 
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: 'Çilek', price: 24.99, quantity: 1, farm: 'Hamzababa Çiftliği', image: require('../images/cart.png') },
-    { id: 2, name: 'Yeşil Biber', price: 24.99, quantity: 2, farm: 'Velibaba Çiftliği', image: require('../images/cart.png') },
-  ]);
-
-  const recommendedItems = [
-    { id: 3, name: 'Domates', price: 24.99, image: require('../images/cart.png') },
-    { id: 4, name: 'Salatalık', price: 24.99, image: require('../images/cart.png') },
-    { id: 5, name: 'Erik', price: 24.99, image: require('../images/cart.png') },
-    { id: 6, name: 'Çeri Domates', price: 24.99, image: require('../images/cart.png') },
+  const recommendedItems: RecommendedItem[] = [
+    { 
+      id: 101,
+      name: 'Organik Domates', 
+      price: 24.99, 
+      image: require('../images/hasan.jpeg'),
+      farm: 'Yeşil Tarım Çiftliği'
+    },
+    { 
+      id: 102,
+      name: 'Sera Salatalığı', 
+      price: 19.99, 
+      image: require('../images/hasan.jpeg'),
+      farm: 'Güneşin Doğuşu Çiftliği'
+    },
+    { 
+      id: 103,
+      name: 'Taze Erik', 
+      price: 29.99, 
+      image: require('../images/hasan.jpeg'),
+      farm: 'Doğal Bereket Çiftliği'
+    },
+    { 
+      id: 104,
+      name: 'Çeri Domates', 
+      price: 34.99, 
+      image: require('../images/hasan.jpeg'),
+      farm: 'Kırsal Lezzetler Çiftliği'
+    },
+    { 
+      id: 105,
+      name: 'Taze Fasulye', 
+      price: 22.99, 
+      image: require('../images/hasan.jpeg'),
+      farm: 'Anadolu Çiftliği'
+    },
+    { 
+      id: 106,
+      name: 'Organik Patlıcan', 
+      price: 26.99, 
+      image: require('../images/hasan.jpeg'),
+      farm: 'Bereket Bahçesi'
+    }
   ];
 
-  const handleAddToCart = (item) => {
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        const savedCart = await AsyncStorage.getItem('cart');
+        if (savedCart) {
+          updateCart(JSON.parse(savedCart));
+        }
+      } catch (error) {
+        console.error('Cart load error:', error);
+      }
+    };
+    
+    loadCart();
+  }, []);
+
+  const handleAddToCart = (item: CartItem | RecommendedItem) => {
     const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
+    const updatedCart = [...cartItems];
+    
     if (existingItem) {
-      setCartItems(cartItems.map(cartItem =>
-        cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
-      ));
+      const index = cartItems.findIndex(cartItem => cartItem.id === item.id);
+      updatedCart[index] = { ...existingItem, quantity: existingItem.quantity + 1 };
     } else {
-      setCartItems([...cartItems, { ...item, quantity: 1, farm: 'Önerilen Çiftlik' }]);
+      updatedCart.push({ 
+        ...item, 
+        quantity: 1, 
+        farm: item.farm
+      } as CartItem);
     }
+    
+    updateCart(updatedCart);
   };
 
-  const handleRemoveFromCart = (id) => {
-    setCartItems(cartItems.map(item =>
-      item.id === id && item.quantity > 0 ? { ...item, quantity: item.quantity - 1 } : item
-    ).filter(item => item.quantity > 0));
+  const handleRemoveFromCart = (id: number) => {
+    const updatedCart = cartItems
+      .map(item => item.id === id ? { ...item, quantity: item.quantity - 1 } : item)
+      .filter(item => item.quantity > 0);
+    
+    updateCart(updatedCart);
   };
 
   const handleClearCart = () => {
-    setCartItems([]);
+    updateCart([]);
   };
 
-  const renderCartItem = ({ item }) => (
+  const renderCartItem = ({ item }: { item: CartItem }) => (
     <View style={styles.item}>
       <View style={styles.content}>
         <Image source={item.image} style={styles.image} />
@@ -81,31 +158,40 @@ const CartScreen = () => {
           <Text style={styles.cartItemName}>{item.name}</Text>
           <Text style={styles.cartItemFarm}>1 kg</Text>
           <Text style={styles.cartItemFarm}>{item.farm}</Text>
-          <Text style={styles.cartItemPrice}>₺{item.price}</Text>
-          <View style={styles.actions}>
-            <View style={styles.quantityContainer}>
-              <TouchableOpacity onPress={() => handleRemoveFromCart(item.id)} style={styles.button}>
-                <Image source={require('../images/rubbish.png')} style={styles.icon} />
-              </TouchableOpacity>
+          <Text style={styles.cartItemPrice}>₺{(item.price * item.quantity).toFixed(2)}</Text>
+          <View style={styles.quantityContainer}>
+            <TouchableOpacity 
+              onPress={() => handleRemoveFromCart(item.id)} 
+              style={styles.quantityButton}
+            >
+              <Text style={styles.quantityButtonText}>-</Text>
+            </TouchableOpacity>
+            <View style={styles.quantityBox}>
               <Text style={styles.quantityText}>{item.quantity}</Text>
-              <TouchableOpacity onPress={() => handleAddToCart(item)} style={styles.button}>
-                <Text style={styles.quantityText}>+</Text>
-              </TouchableOpacity>  
             </View>
+            <TouchableOpacity 
+              onPress={() => handleAddToCart(item)} 
+              style={styles.quantityButton}
+            >
+              <Text style={styles.quantityButtonText}>+</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
     </View>
   );
 
-  const renderRecommendedItem = ({ item }) => (
+  const renderRecommendedItem = ({ item }: { item: RecommendedItem }) => (
     <View style={styles.recommendedItem}>
       <Image source={item.image} style={styles.recommendedItemImage} />
       <TouchableOpacity onPress={() => handleAddToCart(item)} style={styles.addButton}>
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
-      <Text style={styles.recommendedItemName}>{item.name}</Text>
-      <Text style={styles.recommendedItemPrice}>₺{item.price}/kg</Text>
+      <View style={styles.recommendedItemInfo}>
+        <Text style={styles.recommendedItemName}>{item.name}</Text>
+        <Text style={styles.recommendedItemPrice}>₺{item.price}/kg</Text>
+        <Text style={styles.recommendedItemFarm}>{item.farm}</Text>
+      </View>
     </View>
   );
 
@@ -119,12 +205,16 @@ const CartScreen = () => {
         keyExtractor={item => item.id.toString()}
         ListFooterComponent={() => (
           <>
-            <Text style={styles.sectionTitle}>Önerilen Ürünler</Text>
+            <View style={styles.recommendedHeader}>
+              <Text style={styles.sectionTitle}>Önerilen Ürünler</Text>
+              <Text style={styles.recommendedSubtitle}>Çiftliklerden Seçmeler</Text>
+            </View>
             <FlatList
               data={recommendedItems}
               renderItem={renderRecommendedItem}
               keyExtractor={item => item.id.toString()}
               horizontal
+              showsHorizontalScrollIndicator={false}
             />
           </>
         )}
@@ -142,13 +232,20 @@ const CartScreen = () => {
 
 const styles = StyleSheet.create({
   item: {
-    padding: 1,
-    marginVertical: 6,
-    marginHorizontal: 0,
-    borderColor: '#ccc',
-    borderBottomWidth: 1,
-    borderRadius: 5,
-    position: 'relative',
+    backgroundColor: 'white',
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E3F2D9',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   container: {
     flex: 1,
@@ -168,82 +265,132 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: 70,
-    height: 70,
-    marginRight: 10,
-    justifyContent: 'center',
+    width: 80,
+    height: 80,
+    borderRadius: 8,
   },
   details: {
     flex: 1,
     marginLeft: 10,
-    marginBottom: 10,
+    padding: 5,
   },
   cartItemName: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 4,
   },
   cartItemFarm: {
     fontSize: 14,
     color: 'gray',
+    marginBottom: 2,
   },
   cartItemPrice: {
     fontSize: 16,
     color: '#2DB300',
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 5,
   },
-  button: {
-    backgroundColor: '#fff',
-    borderColor: '#ccc',
-    borderWidth: 1,
+  quantityButton: {
+    backgroundColor: '#E3F2D9',
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 15,
+  },
+  quantityButtonText: {
+    fontSize: 20,
+    color: '#2DB300',
+    fontWeight: 'bold',
+  },
+  quantityBox: {
+    backgroundColor: '#2DB300',
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    marginHorizontal: 10,
     borderRadius: 5,
-    padding: 5,
-    marginHorizontal: 5,
   },
   quantityText: {
+    color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginVertical: 10,
-    paddingHorizontal: 10,
+    marginVertical: 5,
+  },
+  recommendedSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
   },
   recommendedItem: {
-    alignItems: 'center',
-    marginHorizontal: 10,
-    position: 'relative',
+    width: 150,
+    marginHorizontal: 8,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   recommendedItemImage: {
-    width: 70,
-    height: 70,
+    width: '100%',
+    height: 100,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  recommendedItemInfo: {
+    padding: 4,
   },
   recommendedItemName: {
     fontSize: 14,
-    marginTop: 5,
+    fontWeight: 'bold',
+    marginBottom: 4,
   },
   recommendedItemPrice: {
     fontSize: 14,
-    color: '#555',
+    color: '#2DB300',
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  recommendedItemFarm: {
+    fontSize: 12,
+    color: '#666',
   },
   addButton: {
     position: 'absolute',
-    top: 2,
-    right: 2,
-    backgroundColor: 'white',
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-    width: 25,
-    height: 25,
-    justifyContent: "center",
-    alignItems: "center",
+    top: 8,
+    right: 8,
+    backgroundColor: '#2DB300',
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   addButtonText: {
-    fontSize: 16,
+    color: 'white',
+    fontSize: 20,
     fontWeight: 'bold',
   },
   checkoutButton: {
@@ -269,6 +416,10 @@ const styles = StyleSheet.create({
     height:20,
     tintColor:'#2DB300',
     opacity:1,
+  },
+  recommendedHeader: {
+    paddingHorizontal: 10,
+    marginBottom: 10,
   },
 });
 

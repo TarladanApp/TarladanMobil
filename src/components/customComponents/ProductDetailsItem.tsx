@@ -1,10 +1,35 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const ProductDetailsItem = ({ item, productQuantities, handleFavoriteToggle, handleRemoveFromCart, handleAddToCart, favorites }) => {
+interface ProductItem {
+  id: number;
+  name: string;
+  price: number;
+  farm: string;
+}
+
+interface ProductDetailsItemProps {
+  item: ProductItem;
+  productQuantities: Record<number, number>;
+  handleFavoriteToggle: (id: number) => void;
+  handleRemoveFromCart: (id: number) => void;
+  handleAddToCart: (id: number) => void;
+  favorites: Record<number, boolean>;
+  onFarmPress: (farmName: string) => void;
+}
+
+const ProductDetailsItem: React.FC<ProductDetailsItemProps> = ({ 
+  item, 
+  productQuantities, 
+  handleFavoriteToggle, 
+  handleRemoveFromCart, 
+  handleAddToCart, 
+  favorites,
+  onFarmPress 
+}) => {
   return (
-    <View style={[styles.item, productQuantities[item.id] && styles.selectedItem]}>
+    <View style={[styles.item, productQuantities[item.id] ? styles.selectedItem : null]}>
       <View style={styles.content}>
         <Image
           source={require('../images/hasan.jpeg')} 
@@ -14,6 +39,9 @@ const ProductDetailsItem = ({ item, productQuantities, handleFavoriteToggle, han
           <Text style={styles.productName}>{item.name}</Text>
           <Text>1 kg</Text>
           <Text style={styles.price}>₺{item.price}</Text>
+          <TouchableOpacity onPress={() => onFarmPress(item.farm)}>
+            <Text style={[styles.farmName, styles.farmNameClickable]}>{item.farm}</Text>
+          </TouchableOpacity>
           <View style={styles.actions}>
             <TouchableOpacity onPress={() => handleFavoriteToggle(item.id)} style={styles.button}>
               <Image source={require('../images/star.png')} style={[styles.notFavorited, favorites[item.id] && styles.icon]}/>
@@ -34,7 +62,6 @@ const ProductDetailsItem = ({ item, productQuantities, handleFavoriteToggle, han
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles.farmName}>{item.farm}</Text>
       </View>
     </View>
   );
@@ -85,6 +112,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
   },
+  farmNameClickable: {
+    textDecorationLine: 'underline',
+  },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -100,13 +130,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    borderColor: "gray",
-    borderWidth: 0.5,
-    marginRight: 3
+    borderColor: "#2DB300",
+    borderWidth: 1,
+    marginRight: 3,
+    padding: 0,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 2,
   },
   buttonText: {
-    fontSize: 25,
+    fontSize: 22,
     color: '#2DB300',
+    fontWeight: 'bold',
+    lineHeight: 22,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    marginTop: -2,
   },
   quantity: {
     backgroundColor:'#2DB300',

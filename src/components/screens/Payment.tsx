@@ -1,16 +1,17 @@
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image} from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
+import { ParamListBase } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useState } from 'react';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { useFocusEffect } from '@react-navigation/native';
 
-const PaymentScreen = ({ navigation }) => {
+const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<ParamListBase> }) => {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
       title: "Deniz Ev",
-      headerTitleAlign: 'flex-start',
+      headerTitleAlign: 'left',
       headerTitleStyle: {
         color: 'white',
         fontSize: 14,
@@ -36,7 +37,7 @@ const PaymentScreen = ({ navigation }) => {
   const [couponCode, setCouponCode] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
   
-  const handlePaymentSelection = paymentOption => {
+  const handlePaymentSelection = (paymentOption: string) => {
     setSelectedPayment(paymentOption);
   };
 
@@ -45,7 +46,7 @@ const PaymentScreen = ({ navigation }) => {
     setShowCoupons(!showCoupons);
   };
 
-  const handleCouponCodeChange = text => {
+  const handleCouponCodeChange = (text: string) => {
     setCouponCode(text);
   };
 

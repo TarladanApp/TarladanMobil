@@ -1,12 +1,12 @@
 /* eslint-disable prettier/prettier */
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const FilterButtons = () => {
   const [selectedButton, setSelectedButton] = useState("all"); // Seçilen butonun durumunu saklar
 
   // Buton tıklandığında çağrılır ve seçilen butonun durumunu günceller
-  const handleButtonPress = (buttonName) => {
+  const handleButtonPress = (buttonName: string) => {
     setSelectedButton(buttonName);
   };
 

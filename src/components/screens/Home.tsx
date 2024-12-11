@@ -7,6 +7,8 @@ import data from "../data.json";
 
 interface Item {
   u_id: number;
+  name: string;
+  imageUrl: string;
   // Add other properties of the item here
 }
 
@@ -27,8 +29,8 @@ function Home({ navigation }: HomeProps) {
 
   return (
     <View style={styles.container}>
-      <View style={{ alignItems: "center", justifyContent: "center", paddingTop: 50 }}>
-        <Image style={{ width: Dimensions.get("window").width / 1.1, height: Dimensions.get("window").height / 6, borderRadius: 10 }}
+      <View style={styles.headerImageContainer}>
+        <Image style={styles.headerImage}
           source={{ uri: "https://ideacdn.net/idea/ef/27/myassets/blogs/1.JPG?revision=1586724702" }} />
       </View>
 
@@ -61,6 +63,18 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
     color: "black",
     fontWeight: "bold"
+  },
+  headerImage: {
+    width: Dimensions.get("window").width / 1.1,
+    height: Dimensions.get("window").height / 6,
+    borderRadius: 10,
+    resizeMode: 'cover'
+  },
+  headerImageContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 50,
+    paddingBottom: 20
   }
 });
 export default Home;
