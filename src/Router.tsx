@@ -1,21 +1,16 @@
 /* eslint-disable prettier/prettier */
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-<<<<<<< HEAD
 import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from '@react-navigation/stack';
-import React from "react";
-=======
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
->>>>>>> 6b790b873442570c4755c360ea6cea5718608e0b
+import React from "react";
 import { Image } from "react-native";
-//import Splash from "./components/screens/Splash";
 import Gallery from './components/customComponents/Gallery';
 import Cart from "./components/screens/Cart";
 import Sertifikalar from './components/screens/Certificate';
 import FarmProfile from "./components/screens/FarmProfile";
 import Home from "./components/screens/Home";
 import Payment from "./components/screens/Payment";
-import ProductDetails from "./components/screens/ProductDetails"; // Ürün detayları sayfası
+import ProductDetails from "./components/screens/ProductDetails";
 import Splash from "./components/screens/Splash";
 import { CartProvider } from './context/CartContext';
 
@@ -75,7 +70,6 @@ const Router = () => {
     <CartProvider>
       <NavigationContainer>
         <Tab.Navigator
-        
           screenOptions={({ route }) => ({
             tabBarVisible:route.name !== 'Cart',
             tabBarIcon: ({ focused }) => {
@@ -97,7 +91,6 @@ const Router = () => {
 
               return <Image source={iconSource} style={{ width: 20, height: 20 }} />;
             }
-<<<<<<< HEAD
           })}
         >
           <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Anasayfa', headerShown: false }} />
@@ -106,18 +99,6 @@ const Router = () => {
         </Tab.Navigator>
       </NavigationContainer>
     </CartProvider>
-=======
-
-            return <Image source={iconSource} style={{ width: 20, height: 20 }} />;
-          }
-        })}
-      >
-        <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Anasayfa', headerShown: false }} />
-        <Tab.Screen name="Cart" component={CartStack} options={{ tabBarLabel: 'Sipariş Ver', headerShown: false }} />
-        <Tab.Screen name="Profile" component={Login} options={{ tabBarLabel: 'Hesabım', headerShown: false }} />
-      </Tab.Navigator>
-    </NavigationContainer>
->>>>>>> 6b790b873442570c4755c360ea6cea5718608e0b
   );
 };
 
