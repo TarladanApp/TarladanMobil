@@ -56,7 +56,7 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
 
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.container}>
         <Text style={styles.title}>Teslimat</Text>
         <View style={styles.buttonContainer}>
@@ -185,6 +185,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+    width: '100%',
   },
   button: {
     backgroundColor: '#4CAF50',
@@ -192,6 +193,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     flex: 1,
     marginRight: 10,
+    height: 50,
+    justifyContent: 'center',
   },
   buttonText: {
     color: '#fff',

@@ -8,6 +8,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useCart } from '../../context/CartContext';
+import PaymentScreen from './Payment';
 
 interface CartItem {
   id: number;
@@ -150,11 +151,6 @@ const CartScreen = () => {
     updateCart([]);
   };
 
-  const handleCheckout = () => {
-    console.log('Navigating to PaymentScreen');
-    navigation.navigate('PaymentScreen');
-  };
-
   const renderCartItem = ({ item }: { item: CartItem }) => (
     <View style={styles.item}>
       <View style={styles.content}>
@@ -226,8 +222,9 @@ const CartScreen = () => {
       />
       <TouchableOpacity 
         style={styles.checkoutButton} 
-        onPress={handleCheckout}
+        onPress={() => navigation.navigate("PaymentScreen")}
       >
+        
         <Text style={styles.checkoutButtonText}>Devam</Text>
         <Text style={styles.totalText}>₺{total}</Text>
       </TouchableOpacity>

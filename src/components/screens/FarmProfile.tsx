@@ -515,6 +515,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 2,
     elevation: 5,
+    zIndex: 1,
+    ...Platform.select({
+      ios: {
+        borderWidth: 1,
+        borderColor: '#269900',
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
   buttonText: {
     marginLeft: 5,
@@ -575,6 +585,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 2,
     elevation: 5,
+    zIndex: 1,
+    ...Platform.select({
+      ios: {
+        borderWidth: 1,
+        borderColor: '#269900',
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
   featuredProductItem: {
     flexDirection: 'row',

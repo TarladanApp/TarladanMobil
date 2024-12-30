@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
-import { ParamListBase, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { ParamListBase, RouteProp, useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useCart } from '../../context/CartContext';
 import ProductDetailsItem from '../customComponents/ProductDetailsItem';
@@ -122,42 +122,44 @@ const ProductDetails = () => {
     navigation.navigate('FarmProfile', { farmName });
   };
 
-  useEffect(() => {
-    navigation.setOptions({
-      title: product.name,
-      headerTitleAlign: 'center',
-      headerTitleStyle: {
-        color: 'white',
-      },
-      headerTintColor: 'white',
-      headerStyle: {
-        backgroundColor: '#2DB300',
-      },
-      headerRight: () => (
-        <View>
-          <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
+  useFocusEffect(
+    useCallback(() => {
+      navigation.setOptions({
+        title: product.name,
+        headerTitleAlign: 'center',
+        headerTitleStyle: {
+          color: 'white',
+        },
+        headerTintColor: 'white',
+        headerStyle: {
+          backgroundColor: '#2DB300',
+        },
+        headerRight: () => (
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginRight: 20 }}>
+            <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
+              <Image
+                source={require('../images/cart.png')}
+                style={{ width: 30, height: 30, tintColor: 'white' }}
+              />
+              {cartBadgeCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{cartBadgeCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+        ),
+        headerLeft: () => (
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Image
-              source={require('../images/cart.png')}
-              style={{ width: 30, height: 30, tintColor: 'white', marginRight: 10 }}
+              source={require('../images/back.png')}
+              style={{ width: 30, height: 30, tintColor: 'white', marginLeft: 10 }}
             />
-            {cartBadgeCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{cartBadgeCount}</Text>
-              </View>
-            )}
           </TouchableOpacity>
-        </View>
-      ),
-      headerLeft: () => (
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image
-            source={require('../images/back.png')}
-            style={{ width: 30, height: 30, tintColor: 'white', marginLeft: 10 }}
-          />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation, product, cartBadgeCount]);
+        ),
+      });
+    }, [navigation, product, cartBadgeCount])
+  );
 
 
   const sampleProducts = [
