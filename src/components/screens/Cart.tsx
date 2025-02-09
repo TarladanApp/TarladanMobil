@@ -151,6 +151,10 @@ const CartScreen = () => {
     updateCart([]);
   };
 
+  const handleContinuePress = () => {
+    navigation.navigate('Payment');
+  };
+
   const renderCartItem = ({ item }: { item: CartItem }) => (
     <View style={styles.item}>
       <View style={styles.content}>
@@ -222,9 +226,8 @@ const CartScreen = () => {
       />
       <TouchableOpacity 
         style={styles.checkoutButton} 
-        onPress={() => navigation.navigate("PaymentScreen")}
+        onPress={handleContinuePress}
       >
-        
         <Text style={styles.checkoutButtonText}>Devam</Text>
         <Text style={styles.totalText}>₺{total}</Text>
       </TouchableOpacity>

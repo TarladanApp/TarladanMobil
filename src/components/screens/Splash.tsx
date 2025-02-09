@@ -1,8 +1,16 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
-import {View, Text, StyleSheet, Image, Pressable} from 'react-native';
+import {View, Text, StyleSheet, Image, Pressable, TouchableOpacity} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
-function Splash() {
+const Splash = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+  const handleOrderPress = () => {
+    navigation.navigate('Register');
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.imagestyle}>
@@ -29,9 +37,9 @@ function Splash() {
         </Text>
       </View>
       <View style={styles.buttonviewstyle}>
-        <Pressable style={styles.buttonstyle}>
+        <TouchableOpacity style={styles.buttonstyle} onPress={handleOrderPress}>
           <Text style={styles.buttontext}>Sipariş Ver</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
       <View>
         <Pressable style={styles.workwithusbutton}>
@@ -42,7 +50,7 @@ function Splash() {
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -116,4 +124,5 @@ const styles = StyleSheet.create({
     color: '#202020',
   },
 });
+
 export default Splash;

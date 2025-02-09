@@ -7,11 +7,10 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'reac
 import { ScrollView } from 'react-native-gesture-handler';
 
 const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<ParamListBase> }) => {
-
   React.useLayoutEffect(() => {
     navigation.setOptions({
       title: "Deniz Ev",
-      headerTitleAlign: 'left',
+      headerTitleAlign: 'center',
       headerTitleStyle: {
         color: 'white',
         fontSize: 14,
@@ -28,10 +27,15 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
           />
         </TouchableOpacity>
       ),
+      headerRight: () => (
+        <Image
+          source={require('../images/Vector.png')}
+          style={{ width: 15, height: 15, marginRight: 10 }}
+        />
+      ),
     });
   }, [navigation]);
 
-  
   const [showCoupons, setShowCoupons] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState('');
   const [couponCode, setCouponCode] = useState('');
@@ -41,7 +45,6 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
     setSelectedPayment(paymentOption);
   };
 
-  
   const toggleCoupons = () => {
     setShowCoupons(!showCoupons);
   };
@@ -54,16 +57,15 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
     setAgreeTerms(!agreeTerms);
   };
 
-
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <View style={styles.container}>
+   <View style={styles.container}>
         <Text style={styles.title}>Teslimat</Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>Şimdi Gelsin</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} >
+          <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>Teslimat Zamanı Seç</Text>
           </TouchableOpacity>
         </View>
@@ -130,24 +132,17 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
             </View>
           </TouchableOpacity>
         </View>
-
-        <Text style={styles.title}>Promosyon Kodu Kullan</Text>
-        <View style={styles.couponContainer}>
-          <TouchableOpacity onPress={toggleCoupons} style={styles.couponButton}>
-            <Text style={styles.buttonText}>+</Text>
-          </TouchableOpacity>
-          {showCoupons && (
-            <View style={styles.couponInput}>
-              <TextInput
-                style={styles.input}
-                placeholder="Kupon kodu girin"
-                value={couponCode}
-                onChangeText={handleCouponCodeChange}
-              />
-            </View>
-          )}
-        </View>
-
+        <TouchableOpacity onPress={toggleCoupons} style={styles.couponButton}>
+          <Text style={styles.buttonText}>Promosyon Kodu Kullan</Text>
+        </TouchableOpacity>
+        {showCoupons && (
+          <TextInput
+            style={styles.couponInput}
+            placeholder="Kupon Kodu"
+            value={couponCode}
+            onChangeText={handleCouponCodeChange}
+          />
+        )}
         <View style={styles.termsContainer}>
           <CheckBox
             value={agreeTerms}
@@ -156,12 +151,9 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
           />
           <Text style={styles.termsText}>Teslimat Sözleşmesini okudum ve kabul ediyorum.</Text>
         </View>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Ödeme Yap</Text>
-          </TouchableOpacity>
-          <Text style={styles.price}>₺74,97</Text>
+        <View style={styles.checkoutButton}>
+          <Text style={styles.checkoutButtonText}>Ödeme Yap</Text>
+          <Text style={styles.totalText}>₺74,97</Text>
         </View>
       </View>
     </ScrollView>
@@ -208,35 +200,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
-    borderRadius : 2,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    flex: 1,
   },
   paymentOptionText: {
-    fontSize: 16,
+    fontSize: 14,
     marginLeft: 10,
+    flex: 1,
+    color: '#333',
+    fontWeight: 'normal',
   },
   checkbox: {
     marginLeft: 5,
-  },
-  couponContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
+    transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],
   },
   couponButton: {
     backgroundColor: '#4CAF50',
     padding: 8,
     borderRadius: 5,
-    marginRight: 10,
+    marginBottom: 20,
   },
   couponInput: {
-    flex: 1,
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 10,
     borderRadius: 5,
-  },
-  input: {
-    fontSize: 16,
+    marginBottom: 20,
   },
   termsContainer: {
     flexDirection: 'row',
@@ -246,24 +239,25 @@ const styles = StyleSheet.create({
   termsText: {
     fontSize: 14,
     marginLeft: 5,
+    flex:1,
   },
-  price: {
-    fontSize: 24,
+  checkoutButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#2DB300',
+    padding: 15,
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  checkoutButtonText: {
+    color: 'white',
+    fontSize: 18,
     fontWeight: 'bold',
   },
-  backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-    zIndex: 1,
-  },
-  backButtonText: {
-    fontSize: 24,
-    color: '#fff',
-  },
-  selectedTimeText: {
-    fontSize: 16,
-    marginTop: 10,
+  totalText: {
+    color: 'white',
+    fontSize: 18,
   },
 });
 

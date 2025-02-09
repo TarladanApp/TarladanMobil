@@ -12,7 +12,10 @@ import Home from "./components/screens/Home";
 import Payment from "./components/screens/Payment";
 import ProductDetails from "./components/screens/ProductDetails";
 import Splash from "./components/screens/Splash";
+import RegisterScreen from "./components/screens/RegisterScreen";
+import LoginScreen from "./components/screens/LoginScreen";
 import { CartProvider } from './context/CartContext';
+import PaymentScreen from "./components/screens/Payment";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -51,6 +54,8 @@ const HomeStack = () => {
           headerTintColor: 'white',
         }}
       />
+      <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 };
@@ -58,8 +63,21 @@ const HomeStack = () => {
 const CartStack = () =>{
   return (
     <Stack.Navigator>
-      <Stack.Screen name="CartScreen" component={Cart}/>
-      <Stack.Screen name="PaymentScreen" component={Payment}/>
+      <Stack.Screen name="CartScreen" component={Cart} options={{ headerShown: false }} />
+      <Stack.Screen 
+        name="Payment" 
+        component={PaymentScreen} 
+        options={{ 
+          headerShown: true,
+          title: 'Deniz Ev',
+          headerStyle: {
+            backgroundColor: '#2DB300',
+          },
+          headerTintColor: '#fff',
+        }} 
+      />
+      <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 };

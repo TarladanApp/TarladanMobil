@@ -135,7 +135,7 @@ const ProductDetails = () => {
           backgroundColor: '#2DB300',
         },
         headerRight: () => (
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginRight: 20 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
             <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
               <Image
                 source={require('../images/cart.png')}
