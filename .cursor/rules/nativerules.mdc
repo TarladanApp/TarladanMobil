@@ -1,0 +1,169 @@
+---
+description: deneme1
+globs: 
+alwaysApply: true
+---
+# React Native Cursor Rules
+
+
+## Asenkron İşlemler
+
+- API çağrıları için aşağıdaki şablonu kullanın:
+
+```javascript
+// src/api/apiService.js
+import axios from 'axios';
+
+const API_BASE_URL = 'https://api.example.com';
+
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// İstek intercept örneği (token ekleme, hata yakalama vb. için)
+apiClient.interceptors.request.use(
+  (config) => {
+    // Token ekleme örneği
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Yanıt intercept örneği
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Genel hata işleme
+    if (error.response && error.response.status === 401) {
+      // Oturum süresi dolmuş, yeniden giriş yapılmalı
+    }
+    return Promise.reject(error);
+  }
+);
+
+// API işlemleri için örnek fonksiyonlar
+export const fetchData = async (endpoint, params = {}) => {
+  try {
+    const response = await apiClient.get(endpoint, { params });
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching data from ${endpoint}:`, error);
+    throw error;
+  }
+};
+
+export const postData = async (endpoint, data) => {
+  try {
+    const response = await apiClient.post(endpoint, data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error posting data to ${endpoint}:`, error);
+    throw error;
+  }
+};
+```
+
+## Pop-up ve Modal Yönetimi
+
+- Pop-up'lar için şu hook temelli yaklaşımı kullanın:
+
+```javascript
+// src/hooks/useModal.js
+import { useState } from 'react';
+
+export const useModal = (initialState = false) => {
+  const [isVisible, setIsVisible] = useState(initialState);
+  const [modalData, setModalData] = useState(null);
+
+  const showModal = (data = null) => {
+    setModalData(data);
+    setIsVisible(true);
+  };
+
+  const hideModal = () => {
+    setIsVisible(false);
+    // Optional: clear data after animation completes
+    setTimeout(() => setModalData(null), 300);
+  };
+
+  return {
+    isVisible,
+    modalData,
+    showModal,
+    hideModal,
+  };
+};
+```
+
+## State Yönetimi (Redux Toolkit Örneği)
+
+```javascript
+// src/store/slices/dataSlice.js
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { fetchData } from '../../api/apiService';
+
+export const fetchItems = createAsyncThunk(
+  'data/fetchItems',
+  async (params, { rejectWithValue }) => {
+    try {
+      return await fetchData('/items', params);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+const dataSlice = createSlice({
+  name: 'data',
+  initialState: {
+    items: [],
+    loading: false,
+    error: null,
+  },
+  reducers: {
+    clearItems: (state) => {
+      state.items = [];
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchItems.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchItems.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+      })
+      .addCase(fetchItems.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+  },
+});
+
+export const { clearItems } = dataSlice.actions;
+export default dataSlice.reducer;
+```
+
+## Clean Code İlkeleri
+
+1. **DRY (Don't Repeat Yourself)**: Kod tekrarından kaçının, ortak fonksiyonları ayırın.
+2. **Tek Sorumluluk İlkesi**: Her bileşen veya fonksiyon yalnızca bir işi yapmalı.
+3. **Anlamlı İsimlendirme**: Değişken, fonksiyon ve bileşen adları açık ve anlaşılır olmalı.
+4. **Yorumlar**: Karmaşık iş mantığı için yorumlar ekleyin, ama kendini açıklayan kodlar için gereksiz yorumlardan kaçının.
+5. **Tutarlı Kod Formatı**: ESLint ve Prettier kullanarak kod formatını standartlaştırın.
+
+## Test Kuralları
+
+- Her bileşen için en azından temel render testleri yazın
+- Karmaşık iş mantığı için birim testleri ekleyin
+- API çağrıları için mock kullanarak entegrasyon testleri yazın
