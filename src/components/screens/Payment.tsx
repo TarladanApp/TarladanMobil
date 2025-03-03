@@ -2,9 +2,11 @@
 import CheckBox from '@react-native-community/checkbox';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Keyboard } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { useCart } from '../../context/CartContext'; // Sepet verilerini almak için
+import Icon from 'react-native-vector-icons/Ionicons'; // İkon kütüphanesini ekleyin
 
 const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<ParamListBase> }) => {
   React.useLayoutEffect(() => {
@@ -39,8 +41,19 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
   const [showCoupons, setShowCoupons] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState('');
   const [couponCode, setCouponCode] = useState('');
+  const [isCouponValid, setIsCouponValid] = useState<boolean | null>(null);
   const [agreeTerms, setAgreeTerms] = useState(false);
   
+  const { cartItems } = useCart(); // Sepet verilerini alın
+  const [totalAmount, setTotalAmount] = useState(0); // Toplam tutar
+  const [discountedAmount, setDiscountedAmount] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Sepet toplamını hesaplayın
+    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    setTotalAmount(total);
+  }, [cartItems]);
+
   const handlePaymentSelection = (paymentOption: string) => {
     setSelectedPayment(paymentOption);
   };
@@ -57,9 +70,34 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
     setAgreeTerms(!agreeTerms);
   };
 
+  const handleCouponSubmit = () => {
+    checkCouponValidity();
+    Keyboard.dismiss(); // Klavyeyi kapat
+  };
+
+  const checkCouponValidity = async () => {
+    try {
+      // Örnek bir promosyon kodu kontrolü
+      if (couponCode === 'TARLADAN10') {
+        setIsCouponValid(true);
+        const discount = 10; // %10 indirim
+        const newTotal = totalAmount - (totalAmount * discount / 100);
+        setDiscountedAmount(newTotal);
+        Alert.alert('Başarılı', `Promosyon kodu geçerli! Yeni toplam: ₺${newTotal.toFixed(2)}`);
+      } else {
+        setIsCouponValid(false);
+        setDiscountedAmount(null);
+        Alert.alert('Hata', 'Promosyon kodu geçersiz.');
+      }
+    } catch (error) {
+      console.error('Kupon kontrol hatası:', error);
+      Alert.alert('Hata', 'Kupon kontrolü sırasında bir hata oluştu.');
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-   <View style={styles.container}>
+      <View style={styles.container}>
         <Text style={styles.title}>Teslimat</Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button}>
@@ -136,12 +174,23 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
           <Text style={styles.buttonText}>Promosyon Kodu Kullan</Text>
         </TouchableOpacity>
         {showCoupons && (
-          <TextInput
-            style={styles.couponInput}
-            placeholder="Kupon Kodu"
-            value={couponCode}
-            onChangeText={handleCouponCodeChange}
-          />
+          <>
+            <TextInput
+              style={styles.couponInput}
+              placeholder="Promosyon Kodu"
+              value={couponCode}
+              onChangeText={setCouponCode}
+              returnKeyType="done"
+            />
+            <TouchableOpacity onPress={handleCouponSubmit} style={styles.checkButton}>
+              <Icon name="checkmark" size={20} color="white" />
+            </TouchableOpacity>
+          </>
+        )}
+        {isCouponValid !== null && (
+          <Text style={{ color: isCouponValid ? 'green' : 'red' }}>
+            {isCouponValid ? 'Kupon geçerli!' : 'Kupon geçersiz!'}
+          </Text>
         )}
         <View style={styles.termsContainer}>
           <CheckBox
@@ -153,7 +202,7 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
         </View>
         <View style={styles.checkoutButton}>
           <Text style={styles.checkoutButtonText}>Ödeme Yap</Text>
-          <Text style={styles.totalText}>₺74,97</Text>
+          <Text style={styles.totalText}>₺{(discountedAmount ?? totalAmount).toFixed(2)}</Text>
         </View>
       </View>
     </ScrollView>
@@ -258,6 +307,13 @@ const styles = StyleSheet.create({
   totalText: {
     color: 'white',
     fontSize: 18,
+  },
+  checkButton: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: 'center',
   },
 });
 
