@@ -1,157 +1,54 @@
 /* eslint-disable prettier/prettier */
+import React from "react";
+import { Dimensions, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import CustomButton from "../customComponents/CustomButton";
+import Produce from "../customComponents/Produce";
+import data from "../data.json";
+
+interface Item {
+  u_id: number;
+  name: string;
+  imageUrl: string;
+  // Add other properties of the item here
+}
+
 import { NavigationProp } from '@react-navigation/native';
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Image, ImageSourcePropType, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { mockApi } from "../../services/api";
-import { Product } from "../../services/mockData";
 
 interface HomeProps {
   navigation: NavigationProp<any>;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  image: ImageSourcePropType;
-}
-
 function Home({ navigation }: HomeProps) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-
-  const categories: Category[] = [
-    { 
-      id: '1', 
-      name: 'Meyve', 
-      image: require('../images/meyve.png')
-    },
-    { 
-      id: '2', 
-      name: 'Sebze', 
-      image: require('../images/sebze.png')
-    },
-    { 
-      id: '3', 
-      name: 'Süt Ürünleri', 
-      image: require('../images/sut.png')
-    },
-    { 
-      id: '4', 
-      name: 'Katma Değer', 
-      image: require('../images/katma.png')
-    },
-  ];
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const data = await mockApi.products.getAll();
-      setProducts(data as Product[]);
-      setError(null);
-    } catch (err) {
-      setError('Ürünler yüklenirken bir hata oluştu');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const renderItem = ({ item }: { item: Product }) => {
+  const renderItem = ({ item }: { item: Item }) => {
     return (
-      <TouchableOpacity 
-        style={styles.productItem}
-        onPress={() => navigation.navigate('ProductDetails', { product: item })}
-      >
-        <Image source={{ uri: item.image }} style={styles.productImage} />
-        <Text style={styles.productName}>{item.name}</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('ProductDetails', { product: item })}>
+        <Produce produce={item}/>
       </TouchableOpacity>
     );
   };
 
-  const renderCategory = ({ item }: { item: Category }) => (
-    <TouchableOpacity 
-      style={styles.categoryItem}
-      onPress={() => setSelectedCategory(item.name.toLowerCase())}
-    >
-      <Image source={item.image} style={styles.categoryImage} />
-      <Text style={styles.categoryName}>{item.name}</Text>
-    </TouchableOpacity>
-  );
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2DB300" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
-  }
-
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.addressButton}>
-          <Image 
-            source={require('../images/plus.png')}
-            style={styles.plusIcon} 
-          />
-          <Text style={styles.addressButtonText}>Yeni adres ekle</Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <View style={styles.headerImageContainer}>
+        <Image style={styles.headerImage}
+          source={{ uri: "https://ideacdn.net/idea/ef/27/myassets/blogs/1.JPG?revision=1586724702" }} />
       </View>
 
-      {/* Welcome Banner */}
-      <View style={styles.bannerContainer}>
-        <Image 
-          source={require('../images/welcome-banner.png')}
-          style={styles.bannerImage}
-        />
-        <View style={styles.bannerTextContainer}>
-          <Text style={styles.bannerTitle}>Hoşgeldin İndirimi</Text>
-          <Text style={styles.bannerSubtitle}>İlk siparişinize özel 250₺ indirim kodu</Text>
-        </View>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Text style={styles.text}>Kategoriler</Text>
+        <Text style={{ fontSize: 16, padding: 12, color: "black", fontWeight: "bold" }}>Tümünü Gör</Text>
       </View>
 
-      {/* Categories */}
-      <View style={styles.categoriesHeader}>
-        <Text style={styles.sectionTitle}>Kategoriler</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAllText}>Tümünü gör</Text>
-        </TouchableOpacity>
-      </View>
-
+      <CustomButton />
+      <Text style={styles.text}>Ürünler</Text>
       <FlatList
-        horizontal
-        data={categories}
-        renderItem={renderCategory}
-        keyExtractor={item => item.id}
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoriesList}
-      />
-
-      {/* Products */}
-      <Text style={styles.sectionTitle}>Ürünler</Text>
-      <FlatList
-        data={products}
+        keyExtractor={item => item.u_id.toString()}
+        data={data}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
-        numColumns={2}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.productsList}
+        numColumns={4}
       />
-    </SafeAreaView>
+
+    </View>
   );
 }
 
@@ -160,130 +57,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
-  header: {
-    backgroundColor: '#2DB300',
-    padding: 15,
-  },
-  addressButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  plusIcon: {
-    width: 20,
-    height: 20,
-    tintColor: 'white',
-    marginRight: 8,
-  },
-  addressButtonText: {
-    color: 'white',
-    fontSize: 16,
-  },
-  bannerContainer: {
-    margin: 15,
-    borderRadius: 10,
-    overflow: 'hidden',
-    height: 150,
-  },
-  bannerImage: {
-    width: '100%',
-    height: '100%',
-  },
-  bannerTextContainer: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-  },
-  bannerTitle: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  bannerSubtitle: {
-    color: 'white',
-    fontSize: 16,
-  },
-  categoriesHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    marginBottom: 10,
-  },
-  sectionTitle: {
+  text: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  seeAllText: {
-    color: '#2DB300',
-    fontSize: 16,
-  },
-  categoriesList: {
-    paddingHorizontal: 10,
-    marginBottom: 20,
-  },
-  categoryItem: {
-    marginHorizontal: 5,
-    width: 100,
-    alignItems: 'center',
-  },
-  categoryImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 5,
-  },
-  categoryName: {
-    fontSize: 14,
-    color: 'black',
-    textAlign: 'center',
-  },
-  productsList: {
-    paddingHorizontal: 10,
-  },
-  productItem: {
-    flex: 1,
-    margin: 5,
     padding: 10,
-    backgroundColor: 'white',
+    paddingBottom: 0,
+    color: "black",
+    fontWeight: "bold"
+  },
+  headerImage: {
+    width: Dimensions.get("window").width / 1.1,
+    height: Dimensions.get("window").height / 6,
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    resizeMode: 'cover'
   },
-  productImage: {
-    width: '100%',
-    height: 120,
-    borderRadius: 10,
-    marginBottom: 5,
-  },
-  productName: {
-    fontSize: 14,
-    color: 'black',
-    textAlign: 'center',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-    fontSize: 16,
-  },
+  headerImageContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 50,
+    paddingBottom: 20
+  }
 });
-
 export default Home;

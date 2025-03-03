@@ -9,12 +9,13 @@ import Cart from "./components/screens/Cart";
 import Sertifikalar from './components/screens/Certificate';
 import FarmProfile from "./components/screens/FarmProfile";
 import Home from "./components/screens/Home";
-import LoginScreen from "./components/screens/LoginScreen";
-import PaymentScreen from "./components/screens/Payment";
+import Payment from "./components/screens/Payment";
 import ProductDetails from "./components/screens/ProductDetails";
-import RegisterScreen from "./components/screens/RegisterScreen";
 import Splash from "./components/screens/Splash";
+import RegisterScreen from "./components/screens/RegisterScreen";
+import LoginScreen from "./components/screens/LoginScreen";
 import { CartProvider } from './context/CartContext';
+import PaymentScreen from "./components/screens/Payment";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -62,17 +63,7 @@ const HomeStack = () => {
 const CartStack = () =>{
   return (
     <Stack.Navigator>
-      <Stack.Screen 
-        name="CartScreen" 
-        component={Cart} 
-        options={{ 
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: '#2DB300',
-          },
-          headerTintColor: 'white',
-        }} 
-      />
+      <Stack.Screen name="CartScreen" component={Cart} options={{ headerShown: false }} />
       <Stack.Screen 
         name="Payment" 
         component={PaymentScreen} 

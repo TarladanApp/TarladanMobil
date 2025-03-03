@@ -1,34 +1,38 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Product } from '../../services/mockData';
+
+interface ProductItem {
+  id: number;
+  name: string;
+  price: number;
+  farm: string;
+}
 
 interface ProductDetailsItemProps {
-  item: Product;
-  quantity: number;
-  isFavorite: boolean;
-  onFavoriteToggle: () => void;
-  onRemoveFromCart: () => void;
-  onAddToCart: () => void;
-  onQuantityChange: (quantity: number) => void;
+  item: ProductItem;
+  productQuantities: Record<number, number>;
+  handleFavoriteToggle: (id: number) => void;
+  handleRemoveFromCart: (id: number) => void;
+  handleAddToCart: (id: number) => void;
+  favorites: Record<number, boolean>;
   onFarmPress: (farmName: string) => void;
 }
 
-const ProductDetailsItem: React.FC<ProductDetailsItemProps> = ({
-  item,
-  quantity,
-  isFavorite,
-  onFavoriteToggle,
-  onRemoveFromCart,
-  onAddToCart,
-  onQuantityChange,
-  onFarmPress
+const ProductDetailsItem: React.FC<ProductDetailsItemProps> = ({ 
+  item, 
+  productQuantities, 
+  handleFavoriteToggle, 
+  handleRemoveFromCart, 
+  handleAddToCart, 
+  favorites,
+  onFarmPress 
 }) => {
   return (
-    <View style={[styles.item, quantity > 0 ? styles.selectedItem : null]}>
+    <View style={[styles.item, productQuantities[item.id] ? styles.selectedItem : null]}>
       <View style={styles.content}>
         <Image
-          source={require('../images/hasan.jpeg')}
+          source={require('../images/hasan.jpeg')} 
           style={styles.image}
         />
         <View style={styles.details}>
@@ -39,26 +43,21 @@ const ProductDetailsItem: React.FC<ProductDetailsItemProps> = ({
             <Text style={[styles.farmName, styles.farmNameClickable]}>{item.farm}</Text>
           </TouchableOpacity>
           <View style={styles.actions}>
-            <TouchableOpacity onPress={onFavoriteToggle} style={styles.button}>
-              <Image 
-                source={require('../images/star.png')} 
-                style={[styles.notFavorited, isFavorite && styles.icon]} 
-              />
+            <TouchableOpacity onPress={() => handleFavoriteToggle(item.id)} style={styles.button}>
+              <Image source={require('../images/star.png')} style={[styles.notFavorited, favorites[item.id] && styles.icon]}/>
             </TouchableOpacity>
-            
-            {quantity > 0 && (
-              <>
-                <TouchableOpacity onPress={() => onRemoveFromCart()} style={styles.button}>
-                  <Image source={require('../images/rubbish.png')} style={styles.icon} />
-                </TouchableOpacity>
-                
-                <View style={styles.quantity}>
-                  <Text style={styles.quantityText}>{quantity}</Text>
-                </View>
-              </>
+            {productQuantities[item.id] > 0 && (
+              <TouchableOpacity onPress={() => handleRemoveFromCart(item.id)} style={styles.button}>
+                <Image source={require('../images/rubbish.png')} style={styles.icon}/>
+              </TouchableOpacity>
             )}
-            
-            <TouchableOpacity onPress={onAddToCart} style={styles.button}>
+            {productQuantities[item.id] > 0 && (
+              <View style={styles.quantity}>
+                   <Text style={styles.quantityText}>{productQuantities[item.id]}</Text>
+              </View>
+             
+            )}
+            <TouchableOpacity onPress={() => handleAddToCart(item.id)} style={styles.button}>
               <Text style={styles.buttonText}>+</Text>
             </TouchableOpacity>
           </View>
@@ -107,7 +106,7 @@ const styles = StyleSheet.create({
   },
   farmName: {
     fontSize: 12,
-    fontWeight: "bold",
+    fontWeight:"bold",
     color: '#2DB300',
     position: 'absolute',
     bottom: 0,
@@ -154,28 +153,28 @@ const styles = StyleSheet.create({
     marginTop: -2,
   },
   quantity: {
-    backgroundColor: '#2DB300',
-    width: 30,
-    height: 30,
+    backgroundColor:'#2DB300',
+    width:30,
+    height:30,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  quantityText: {
+  quantityText:{
     fontSize: 16,
     marginHorizontal: 5,
-    color: "white",
+    color:"white",
   },
-  icon: {
-    width: 20,
-    height: 20,
-    tintColor: '#2DB300',
-    opacity: 1
+  icon:{
+    width:20,
+    height:20,
+    tintColor:'#2DB300',
+    opacity:1
   },
-  notFavorited: {
-    width: 20,
-    height: 20,
-    tintColor: '#2DB300',
-    opacity: 0.3
+  notFavorited:{
+    width:20,
+    height:20,
+    tintColor:'#2DB300',
+    opacity:0.3
   },
 });
 
