@@ -8,10 +8,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useCart } from '../../context/CartContext';
-import PaymentScreen from './Payment';
 
 interface CartItem {
-  id: number;
+  id: string;
   name: string;
   price: number;
   quantity: number;
@@ -20,7 +19,7 @@ interface CartItem {
 }
 
 interface RecommendedItem {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: any;
@@ -29,7 +28,7 @@ interface RecommendedItem {
 
 const CartScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
-  const { cartItems, updateCart } = useCart();
+  const { cartItems, updateQuantity, addToCart: addItem, removeFromCart, clearCart } = useCart();
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -51,7 +50,10 @@ const CartScreen = () => {
         </TouchableOpacity>
       ),
       headerLeft: () => (
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.navigate('Home', {
+          screen: 'ProductDetails',
+          params: { product: cartItems[0] }
+        })}>
           <Image
             source={require('../images/back.png')}
             style={{ width: 30, height: 30, tintColor: 'white', marginLeft: 10 }}
@@ -63,42 +65,42 @@ const CartScreen = () => {
 
   const recommendedItems: RecommendedItem[] = [
     { 
-      id: 101,
+      id: '101',
       name: 'Organik Domates', 
       price: 24.99, 
       image: require('../images/hasan.jpeg'),
       farm: 'Yeşil Tarım Çiftliği'
     },
     { 
-      id: 102,
+      id: '102',
       name: 'Sera Salatalığı', 
       price: 19.99, 
       image: require('../images/hasan.jpeg'),
       farm: 'Güneşin Doğuşu Çiftliği'
     },
     { 
-      id: 103,
+      id: '103',
       name: 'Taze Erik', 
       price: 29.99, 
       image: require('../images/hasan.jpeg'),
       farm: 'Doğal Bereket Çiftliği'
     },
     { 
-      id: 104,
+      id: '104',
       name: 'Çeri Domates', 
       price: 34.99, 
       image: require('../images/hasan.jpeg'),
       farm: 'Kırsal Lezzetler Çiftliği'
     },
     { 
-      id: 105,
+      id: '105',
       name: 'Taze Fasulye', 
       price: 22.99, 
       image: require('../images/hasan.jpeg'),
       farm: 'Anadolu Çiftliği'
     },
     { 
-      id: 106,
+      id: '106',
       name: 'Organik Patlıcan', 
       price: 26.99, 
       image: require('../images/hasan.jpeg'),
@@ -111,7 +113,10 @@ const CartScreen = () => {
       try {
         const savedCart = await AsyncStorage.getItem('cart');
         if (savedCart) {
-          updateCart(JSON.parse(savedCart));
+          const parsedCart = JSON.parse(savedCart);
+          for (const item of parsedCart) {
+            await addItem(item);
+          }
         }
       } catch (error) {
         console.error('Cart load error:', error);
@@ -121,34 +126,19 @@ const CartScreen = () => {
     loadCart();
   }, []);
 
-  const handleAddToCart = (item: CartItem | RecommendedItem) => {
-    const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
-    const updatedCart = [...cartItems];
-    
-    if (existingItem) {
-      const index = cartItems.findIndex(cartItem => cartItem.id === item.id);
-      updatedCart[index] = { ...existingItem, quantity: existingItem.quantity + 1 };
-    } else {
-      updatedCart.push({ 
-        ...item, 
-        quantity: 1, 
-        farm: item.farm
-      } as CartItem);
+  const handleAddToCart = async (item: CartItem | RecommendedItem) => {
+    await addItem(item);
+  };
+
+  const handleRemoveFromCart = async (id: string) => {
+    const item = cartItems.find(i => i.id === id);
+    if (item) {
+      await updateQuantity(id, item.quantity - 1);
     }
-    
-    updateCart(updatedCart);
   };
 
-  const handleRemoveFromCart = (id: number) => {
-    const updatedCart = cartItems
-      .map(item => item.id === id ? { ...item, quantity: item.quantity - 1 } : item)
-      .filter(item => item.quantity > 0);
-    
-    updateCart(updatedCart);
-  };
-
-  const handleClearCart = () => {
-    updateCart([]);
+  const handleClearCart = async () => {
+    await clearCart();
   };
 
   const handleContinuePress = () => {
@@ -207,7 +197,7 @@ const CartScreen = () => {
       <FlatList
         data={cartItems}
         renderItem={renderCartItem}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item.id}
         ListFooterComponent={() => (
           <>
             <View style={styles.recommendedHeader}>
@@ -217,7 +207,7 @@ const CartScreen = () => {
             <FlatList
               data={recommendedItems}
               renderItem={renderRecommendedItem}
-              keyExtractor={item => item.id.toString()}
+              keyExtractor={item => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
             />
