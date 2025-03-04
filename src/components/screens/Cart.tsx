@@ -6,9 +6,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect } from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useCart } from '../../context/CartContext';
-import PaymentScreen from './Payment';
 
 interface CartItem {
   id: number;
@@ -33,31 +32,7 @@ const CartScreen = () => {
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
-      title: "Sepetim",
-      headerTitleAlign: 'center',
-      headerTitleStyle: {
-        color: 'white',
-      },
-      headerTintColor: 'white',
-      headerStyle: {
-        backgroundColor: '#2DB300',
-      },
-      headerRight: () => (
-        <TouchableOpacity onPress={handleClearCart}>
-          <Image
-            source={require('../images/rubbish.png')}
-            style={{ width: 30, height: 30, tintColor: 'white', marginRight: 10 }}
-          />
-        </TouchableOpacity>
-      ),
-      headerLeft: () => (
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image
-            source={require('../images/back.png')}
-            style={{ width: 30, height: 30, tintColor: 'white', marginLeft: 10 }}
-          />
-        </TouchableOpacity>
-      ),
+      headerShown: false,
     });
   }, [navigation]);
 
@@ -148,7 +123,27 @@ const CartScreen = () => {
   };
 
   const handleClearCart = () => {
-    updateCart([]);
+    Alert.alert(
+      'Sepeti Temizle',
+      'Sepetinizdeki tüm ürünleri silmek istediğinize emin misiniz?',
+      [
+        {
+          text: 'İptal',
+          style: 'cancel',
+        },
+        {
+          text: 'Evet',
+          onPress: () => {
+            updateCart([]);
+            Alert.alert('Başarılı', 'Sepetiniz temizlendi');
+          },
+        },
+      ],
+    );
+  };
+
+  const handleGoBack = () => {
+    navigation.goBack();
   };
 
   const handleContinuePress = () => {
@@ -204,10 +199,37 @@ const CartScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Custom Header */}
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <TouchableOpacity onPress={handleGoBack} style={styles.headerButton}>
+            <Image
+              source={require('../images/back.png')}
+              style={styles.headerIcon}
+            />
+          </TouchableOpacity>
+          
+          <Text style={styles.headerTitle}>Sepetim</Text>
+          
+          <TouchableOpacity onPress={handleClearCart} style={styles.headerButton}>
+            <Image
+              source={require('../images/rubbish.png')}
+              style={styles.headerIcon}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Cart Items */}
       <FlatList
         data={cartItems}
         renderItem={renderCartItem}
         keyExtractor={item => item.id.toString()}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyCart}>
+            <Text style={styles.emptyCartText}>Sepetiniz boş</Text>
+          </View>
+        )}
         ListFooterComponent={() => (
           <>
             <View style={styles.recommendedHeader}>
@@ -224,13 +246,16 @@ const CartScreen = () => {
           </>
         )}
       />
-      <TouchableOpacity 
-        style={styles.checkoutButton} 
-        onPress={handleContinuePress}
-      >
-        <Text style={styles.checkoutButtonText}>Devam</Text>
-        <Text style={styles.totalText}>₺{total}</Text>
-      </TouchableOpacity>
+
+      {cartItems.length > 0 && (
+        <TouchableOpacity 
+          style={styles.checkoutButton} 
+          onPress={handleContinuePress}
+        >
+          <Text style={styles.checkoutButtonText}>Devam</Text>
+          <Text style={styles.totalText}>₺{total}</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -255,7 +280,42 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    padding: 10,
+  },
+  header: {
+    backgroundColor: '#2DB300',
+    paddingTop: 20,
+    paddingBottom: 5,
+    height: 60,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 15,
+    height: '100%',
+  },
+  headerButton: {
+    padding: 5,
+  },
+  headerIcon: {
+    width: 24,
+    height: 24,
+    tintColor: 'white',
+  },
+  headerTitle: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  emptyCart: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyCartText: {
+    fontSize: 16,
+    color: '#666',
   },
   actions: {
     flexDirection: 'row',
