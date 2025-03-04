@@ -18,25 +18,25 @@ const Profile = () => {
       id: 1,
       title: 'Ayarlar',
       icon: require('../images/settings.png'),
-      onPress: () => console.log('Ayarlar'),
+      onPress: () => navigation.navigate('Settings'),
     },
     {
       id: 2,
       title: 'Kart Bilgileri',
       icon: require('../images/credit-card.png'),
-      onPress: () => console.log('Kart Bilgileri'),
+      onPress: () => navigation.navigate('PaymentMethods'),
     },
     {
       id: 3,
       title: 'Kayıtlı Adreslerim',
       icon: require('../images/location.png'),
-      onPress: () => console.log('Kayıtlı Adreslerim'),
+      onPress: () => navigation.navigate('SavedAddresses'),
     },
     {
       id: 4,
       title: 'Önceki Siparişlerim',
       icon: require('../images/order-history.png'),
-      onPress: () => console.log('Önceki Siparişlerim'),
+      onPress: () => navigation.navigate('OrderHistory'),
     },
   ];
 

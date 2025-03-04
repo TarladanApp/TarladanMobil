@@ -10,10 +10,14 @@ import Sertifikalar from './components/screens/Certificate';
 import FarmProfile from "./components/screens/FarmProfile";
 import Home from "./components/screens/Home";
 import LoginScreen from "./components/screens/LoginScreen";
+import OrderHistory from "./components/screens/OrderHistory";
 import PaymentScreen from "./components/screens/Payment";
+import PaymentMethods from "./components/screens/PaymentMethods";
 import ProductDetails from "./components/screens/ProductDetails";
 import Profile from "./components/screens/Profile";
 import RegisterScreen from "./components/screens/RegisterScreen";
+import SavedAddresses from "./components/screens/SavedAddresses";
+import Settings from "./components/screens/Settings";
 import { CartProvider } from './context/CartContext';
 
 const Tab = createBottomTabNavigator();
@@ -81,6 +85,17 @@ const CartStack = () =>{
   );
 };
 
+const ProfileStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="ProfileScreen" component={Profile} options={{ headerShown: false }} />
+      <Stack.Screen name="Settings" component={Settings} options={{ headerShown: false }} />
+      <Stack.Screen name="PaymentMethods" component={PaymentMethods} options={{ headerShown: false }} />
+      <Stack.Screen name="SavedAddresses" component={SavedAddresses} options={{ headerShown: false }} />
+      <Stack.Screen name="OrderHistory" component={OrderHistory} options={{ headerShown: false }} />
+    </Stack.Navigator>
+  );
+};
 
 const Router = () => {
   return (
@@ -112,13 +127,11 @@ const Router = () => {
         >
           <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Anasayfa', headerShown: false }} />
           <Tab.Screen name="Cart" component={CartStack} options={{ tabBarLabel: 'Sipariş Ver', headerShown: false }} />
-          <Tab.Screen name="Profile" component={Profile} options={{ tabBarLabel: 'Hesabım', headerShown: false }} />
+          <Tab.Screen name="Profile" component={ProfileStack} options={{ tabBarLabel: 'Hesabım', headerShown: false }} />
         </Tab.Navigator>
       </NavigationContainer>
     </CartProvider>
   );
 };
-
-
 
 export default Router;
