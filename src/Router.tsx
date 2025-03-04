@@ -12,8 +12,8 @@ import Home from "./components/screens/Home";
 import LoginScreen from "./components/screens/LoginScreen";
 import PaymentScreen from "./components/screens/Payment";
 import ProductDetails from "./components/screens/ProductDetails";
+import Profile from "./components/screens/Profile";
 import RegisterScreen from "./components/screens/RegisterScreen";
-import Splash from "./components/screens/Splash";
 import { CartProvider } from './context/CartContext';
 
 const Tab = createBottomTabNavigator();
@@ -112,7 +112,7 @@ const Router = () => {
         >
           <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Anasayfa', headerShown: false }} />
           <Tab.Screen name="Cart" component={CartStack} options={{ tabBarLabel: 'Sipariş Ver', headerShown: false }} />
-          <Tab.Screen name="Profile" component={Splash} options={{ tabBarLabel: 'Hesabım', headerShown: false }} />
+          <Tab.Screen name="Profile" component={Profile} options={{ tabBarLabel: 'Hesabım', headerShown: false }} />
         </Tab.Navigator>
       </NavigationContainer>
     </CartProvider>
