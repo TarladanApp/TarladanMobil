@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable no-trailing-spaces */
 /* eslint-disable prettier/prettier */
 // CartScreen.js
@@ -107,7 +109,7 @@ const CartScreen = () => {
       updatedCart.push({ 
         ...item, 
         quantity: 1, 
-        farm: item.farm
+        farm: item.farm,
       } as CartItem);
     }
     

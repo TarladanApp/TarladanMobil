@@ -1,40 +1,49 @@
-import React, { useState } from 'react';
-import { Dimensions, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Icon } from 'react-native-elements';
+/* eslint-disable prettier/prettier */
+import React, {useState} from 'react';
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {Icon} from 'react-native-elements';
 import Modal from 'react-native-modal';
 
 interface GalleryProps {
   route: any;
 }
 
-const Gallery = ({ route }: GalleryProps) => {
+const Gallery = ({route}: GalleryProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const galleryImages = [
-    { 
-      id: '1', 
+    {
+      id: '1',
       uri: 'https://www.upload.ee/image/16684000/Rectangle_55.png',
       title: 'Domates Serası',
-      date: '15 Mart 2024'
+      date: '15 Mart 2024',
     },
-    { 
-      id: '2', 
+    {
+      id: '2',
       uri: 'https://www.upload.ee/image/16684004/Rectangle_52.png',
       title: 'Salatalık Üretimi',
-      date: '14 Mart 2024'
+      date: '14 Mart 2024',
     },
-    { 
-      id: '3', 
+    {
+      id: '3',
       uri: 'https://www.upload.ee/image/16684005/Rectangle_54.png',
       title: 'Taze Ürünler',
-      date: '13 Mart 2024'
+      date: '13 Mart 2024',
     },
-    { 
-      id: '4', 
+    {
+      id: '4',
       uri: 'https://www.upload.ee/image/16684008/Rectangle_57.png',
       title: 'Biber Hasadı',
-      date: '12 Mart 2024'
+      date: '12 Mart 2024',
     },
   ];
 
@@ -43,12 +52,15 @@ const Gallery = ({ route }: GalleryProps) => {
     setIsModalVisible(true);
   };
 
-  const renderItem = ({ item }: { item: { id: string; uri: string; title: string; date: string } }) => (
-    <TouchableOpacity 
+  const renderItem = ({
+    item,
+  }: {
+    item: {id: string; uri: string; title: string; date: string};
+  }) => (
+    <TouchableOpacity
       style={styles.imageContainer}
-      onPress={() => handleImagePress(item.uri)}
-    >
-      <Image source={{ uri: item.uri }} style={styles.image} />
+      onPress={() => handleImagePress(item.uri)}>
+      <Image source={{uri: item.uri}} style={styles.image} />
       <View style={styles.imageInfo}>
         <Text style={styles.imageTitle}>{item.title}</Text>
         <Text style={styles.imageDate}>{item.date}</Text>
@@ -62,7 +74,7 @@ const Gallery = ({ route }: GalleryProps) => {
         <Text style={styles.title}>{route.params?.farmName || 'Galeri'}</Text>
         <Text style={styles.subtitle}>{galleryImages.length} Fotoğraf</Text>
       </View>
-      
+
       <FlatList
         data={galleryImages}
         renderItem={renderItem}
@@ -72,23 +84,21 @@ const Gallery = ({ route }: GalleryProps) => {
         showsVerticalScrollIndicator={false}
       />
 
-      <Modal 
+      <Modal
         isVisible={isModalVisible}
         onBackdropPress={() => setIsModalVisible(false)}
-        style={styles.modal}
-      >
+        style={styles.modal}>
         <View style={styles.modalContent}>
           {selectedImage && (
-            <Image 
-              source={{ uri: selectedImage }} 
-              style={styles.modalImage} 
+            <Image
+              source={{uri: selectedImage}}
+              style={styles.modalImage}
               resizeMode="contain"
             />
           )}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.closeButton}
-            onPress={() => setIsModalVisible(false)}
-          >
+            onPress={() => setIsModalVisible(false)}>
             <Icon name="close" type="material" color="#fff" size={30} />
           </TouchableOpacity>
         </View>
@@ -129,7 +139,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
@@ -176,4 +186,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Gallery; 
+export default Gallery;

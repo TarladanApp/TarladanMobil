@@ -48,9 +48,13 @@ const ProductDetailsItem: React.FC<ProductDetailsItemProps> = ({
             </TouchableOpacity>
             {productQuantities[item.id] > 0 && (
               <TouchableOpacity onPress={() => handleRemoveFromCart(item.id)} style={styles.button}>
-                <Image source={require('../images/rubbish.png')} style={styles.icon}/>
-              </TouchableOpacity>
-            )}
+                {productQuantities[item.id] === 1 ? (
+                  <Image source={require('../images/rubbish.png')} style={styles.icon} />) 
+                  : (
+                  <Text style={styles.minus}>-</Text>
+                )}
+  </TouchableOpacity>
+)}
             {productQuantities[item.id] > 0 && (
               <View style={styles.quantity}>
                    <Text style={styles.quantityText}>{productQuantities[item.id]}</Text>
@@ -175,6 +179,12 @@ const styles = StyleSheet.create({
     height:20,
     tintColor:'#2DB300',
     opacity:0.3
+  },
+  minus: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000',
+    textAlign: 'center',
   },
 });
 
