@@ -2,11 +2,11 @@
 import CheckBox from '@react-native-community/checkbox';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useState, useEffect } from 'react';
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Keyboard } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Image, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { useCart } from '../../context/CartContext'; // Sepet verilerini almak için
 import Icon from 'react-native-vector-icons/Ionicons'; // İkon kütüphanesini ekleyin
+import { useCart } from '../../context/CartContext'; // Sepet verilerini almak için
 
 const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<ParamListBase> }) => {
   React.useLayoutEffect(() => {
@@ -29,11 +29,14 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
           />
         </TouchableOpacity>
       ),
+      
       headerRight: () => (
-        <Image
-          source={require('../images/Vector.png')}
-          style={{ width: 15, height: 15, marginRight: 10 }}
-        />
+        <TouchableOpacity onPress={() => navigation.navigate('SavedAddresses')}>
+          <Image
+            source={require('../images/Vector.png')}
+            style={{ width: 15, height: 15, marginRight: 10 }}
+          />
+        </TouchableOpacity>
       ),
     });
   }, [navigation]);

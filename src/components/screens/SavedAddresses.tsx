@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const SavedAddresses = () => {
@@ -11,6 +11,13 @@ const SavedAddresses = () => {
   const [newAddress, setNewAddress] = useState({
     title: '',
     address: '',
+    city: '',
+    district: '',
+    neighborhood: '',
+    street: '',
+    buildingNo: '',
+    apartmentNo: '',
+    addressDetails: '',
     isDefault: false,
   });
   const [addresses, setAddresses] = useState([
@@ -18,15 +25,46 @@ const SavedAddresses = () => {
       id: 1,
       title: 'Ev',
       address: 'Atatürk Mahallesi, Cumhuriyet Caddesi No:123 D:4, Kadıköy/İstanbul',
+      city: 'İstanbul',
+      district: 'Kadıköy',
+      neighborhood: 'Atatürk',
+      street: 'Cumhuriyet Caddesi',
+      buildingNo: '123',
+      apartmentNo: '4',
+      addressDetails: '2. Kat',
       isDefault: true,
     },
     {
       id: 2,
       title: 'İş',
       address: 'Levent Mahallesi, İş Kuleleri No:45 Kat:12, Beşiktaş/İstanbul',
+      city: 'İstanbul',
+      district: 'Beşiktaş',
+      neighborhood: 'Levent',
+      street: 'İş Kuleleri Caddesi',
+      buildingNo: '45',
+      apartmentNo: '12',
+      addressDetails: 'B Blok',
       isDefault: false,
     },
   ]);
+
+  useLayoutEffect(() => {
+    const defaultAddress = addresses.find(addr => addr.isDefault);
+    navigation.setOptions({
+      headerTitle: defaultAddress?.title || 'Kayıtlı Adreslerim',
+      headerTitleAlign: 'center',
+      headerTitleStyle: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+      },
+      headerStyle: {
+        backgroundColor: '#2DB300',
+      },
+      headerTintColor: 'white',
+    });
+  }, [navigation, addresses]);
 
   const handleDeleteAddress = (id: number) => {
     const addressToDelete = addresses.find(addr => addr.id === id);
@@ -59,29 +97,38 @@ const SavedAddresses = () => {
     setNewAddress({
       title: address.title,
       address: address.address,
+      city: address.city,
+      district: address.district,
+      neighborhood: address.neighborhood,
+      street: address.street,
+      buildingNo: address.buildingNo,
+      apartmentNo: address.apartmentNo,
+      addressDetails: address.addressDetails,
       isDefault: address.isDefault,
     });
     setModalVisible(true);
   };
 
   const handleSaveAddress = () => {
-    if (!newAddress.title || !newAddress.address) {
-      Alert.alert('Hata', 'Lütfen tüm alanları doldurun');
+    if (!newAddress.title || !newAddress.city || !newAddress.district || !newAddress.neighborhood || !newAddress.street) {
+      Alert.alert('Hata', 'Lütfen gerekli alanları doldurun (Başlık, İl, İlçe, Mahalle, Sokak)');
       return;
     }
 
+    // Tam adresi oluştur
+    const fullAddress = `${newAddress.neighborhood} Mah., ${newAddress.street}${newAddress.buildingNo ? ` No:${newAddress.buildingNo}` : ''}${newAddress.apartmentNo ? ` D:${newAddress.apartmentNo}` : ''}, ${newAddress.district}/${newAddress.city}${newAddress.addressDetails ? `\n${newAddress.addressDetails}` : ''}`;
+
     if (editingAddress) {
-      // Düzenleme modu
       setAddresses(addresses.map(addr => 
         addr.id === editingAddress.id 
-          ? { ...addr, ...newAddress }
+          ? { ...addr, ...newAddress, address: fullAddress }
           : addr
       ));
     } else {
-      // Yeni adres ekleme modu
       const newAddressObj = {
         id: addresses.length + 1,
         ...newAddress,
+        address: fullAddress,
       };
       setAddresses([...addresses, newAddressObj]);
     }
@@ -91,6 +138,13 @@ const SavedAddresses = () => {
     setNewAddress({
       title: '',
       address: '',
+      city: '',
+      district: '',
+      neighborhood: '',
+      street: '',
+      buildingNo: '',
+      apartmentNo: '',
+      addressDetails: '',
       isDefault: false,
     });
   };
@@ -167,6 +221,13 @@ const SavedAddresses = () => {
           setNewAddress({
             title: '',
             address: '',
+            city: '',
+            district: '',
+            neighborhood: '',
+            street: '',
+            buildingNo: '',
+            apartmentNo: '',
+            addressDetails: '',
             isDefault: false,
           });
           setModalVisible(true);
@@ -186,56 +247,114 @@ const SavedAddresses = () => {
         }}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {editingAddress ? 'Adresi Düzenle' : 'Yeni Adres Ekle'}
-            </Text>
-            
-            <TextInput
-              style={styles.input}
-              placeholder="Adres Başlığı (Ev, İş vb.)"
-              value={newAddress.title}
-              onChangeText={(text) => setNewAddress({...newAddress, title: text})}
-            />
-            
-            <TextInput
-              style={[styles.input, styles.addressInput]}
-              placeholder="Adres"
-              value={newAddress.address}
-              onChangeText={(text) => setNewAddress({...newAddress, address: text})}
-              multiline
-              numberOfLines={3}
-            />
+          <View style={styles.modalOverlay}>
+            <ScrollView style={styles.modalScrollView} contentContainerStyle={styles.modalScrollViewContent}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>
+                  {editingAddress ? 'Adresi Düzenle' : 'Yeni Adres Ekle'}
+                </Text>
+                
+                <TextInput
+                  style={styles.input}
+                  placeholder="Adres Başlığı (Ev, İş vb.)"
+                  placeholderTextColor="#666"
+                  value={newAddress.title}
+                  onChangeText={(text) => setNewAddress({...newAddress, title: text})}
+                />
 
-            <TouchableOpacity 
-              style={styles.defaultCheckbox}
-              onPress={() => setNewAddress({...newAddress, isDefault: !newAddress.isDefault})}
-            >
-              <View style={[
-                styles.checkbox,
-                newAddress.isDefault && styles.checkboxChecked
-              ]} />
-              <Text style={styles.checkboxLabel}>Varsayılan adres olarak ayarla</Text>
-            </TouchableOpacity>
+                <TextInput
+                  style={styles.input}
+                  placeholder="İl"
+                  placeholderTextColor="#666"
+                  value={newAddress.city}
+                  onChangeText={(text) => setNewAddress({...newAddress, city: text})}
+                />
 
-            <View style={styles.modalButtons}>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.cancelButton]} 
-                onPress={() => {
-                  setModalVisible(false);
-                  setEditingAddress(null);
-                }}
-              >
-                <Text style={styles.modalButtonText}>İptal</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.saveButton]} 
-                onPress={handleSaveAddress}
-              >
-                <Text style={styles.modalButtonText}>Kaydet</Text>
-              </TouchableOpacity>
-            </View>
+                <TextInput
+                  style={styles.input}
+                  placeholder="İlçe"
+                  placeholderTextColor="#666"
+                  value={newAddress.district}
+                  onChangeText={(text) => setNewAddress({...newAddress, district: text})}
+                />
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Mahalle"
+                  placeholderTextColor="#666"
+                  value={newAddress.neighborhood}
+                  onChangeText={(text) => setNewAddress({...newAddress, neighborhood: text})}
+                />
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Cadde/Sokak"
+                  placeholderTextColor="#666"
+                  value={newAddress.street}
+                  onChangeText={(text) => setNewAddress({...newAddress, street: text})}
+                />
+
+                <View style={styles.rowContainer}>
+                  <TextInput
+                    style={[styles.input, styles.halfInput]}
+                    placeholder="Bina No"
+                    placeholderTextColor="#666"
+                    value={newAddress.buildingNo}
+                    onChangeText={(text) => setNewAddress({...newAddress, buildingNo: text})}
+                    keyboardType="numeric"
+                  />
+
+                  <TextInput
+                    style={[styles.input, styles.halfInput]}
+                    placeholder="Daire No"
+                    placeholderTextColor="#666"
+                    value={newAddress.apartmentNo}
+                    onChangeText={(text) => setNewAddress({...newAddress, apartmentNo: text})}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <TextInput
+                  style={[styles.input, styles.addressInput]}
+                  placeholder="Adres Tarifi (Opsiyonel)"
+                  placeholderTextColor="#666"
+                  value={newAddress.addressDetails}
+                  onChangeText={(text) => setNewAddress({...newAddress, addressDetails: text})}
+                  multiline
+                  numberOfLines={3}
+                />
+
+                <TouchableOpacity 
+                  style={styles.defaultCheckbox}
+                  onPress={() => setNewAddress({...newAddress, isDefault: !newAddress.isDefault})}
+                >
+                  <View style={[
+                    styles.checkbox,
+                    newAddress.isDefault && styles.checkboxChecked
+                  ]} />
+                  <Text style={styles.checkboxLabel}>Varsayılan adres olarak ayarla</Text>
+                </TouchableOpacity>
+
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity 
+                    style={[styles.modalButton, styles.cancelButton]} 
+                    onPress={() => {
+                      setModalVisible(false);
+                      setEditingAddress(null);
+                    }}
+                  >
+                    <Text style={styles.modalButtonText}>İptal</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={[styles.modalButton, styles.saveButton]} 
+                    onPress={handleSaveAddress}
+                  >
+                    <Text style={styles.modalButtonText}>Kaydet</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -369,11 +488,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalContent: {
+  modalOverlay: {
+    width: '90%',
+    maxHeight: '80%',
     backgroundColor: 'white',
     borderRadius: 10,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  modalScrollView: {
+    width: '100%',
+  },
+  modalScrollViewContent: {
+    flexGrow: 1,
+  },
+  modalContent: {
     padding: 20,
-    width: '90%',
+    width: '100%',
   },
   modalTitle: {
     fontSize: 18,
@@ -396,7 +533,6 @@ const styles = StyleSheet.create({
     height: 80,
     textAlignVertical: 'top',
     paddingTop: 10,
-    color: 'black',
   },
   defaultCheckbox: {
     flexDirection: 'row',
@@ -438,6 +574,14 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     fontWeight: 'bold',
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  halfInput: {
+    width: '48%',
   },
 });
 

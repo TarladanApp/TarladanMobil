@@ -11,13 +11,6 @@ const Settings = () => {
 
   const settingsItems = [
     {
-      id: 1,
-      title: 'Karanlık Mod',
-      value: isDarkMode,
-      onValueChange: () => setIsDarkMode(prev => !prev),
-      type: 'switch'
-    },
-    {
       id: 2,
       title: 'Bildirimler',
       value: isNotifications,

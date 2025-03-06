@@ -11,6 +11,7 @@ const PaymentMethods = () => {
     cardNumber: '',
     cardHolder: '',
     expiryDate: '',
+    cvv: '',
     type: 'Mastercard',
   });
   const [cards, setCards] = useState([
@@ -67,8 +68,33 @@ const PaymentMethods = () => {
       cardNumber: '',
       cardHolder: '',
       expiryDate: '',
+      cvv: '',
       type: 'Mastercard',
     });
+  };
+
+  const formatExpiryDate = (text: string) => {
+    // Sadece rakamları al
+    const numbers = text.replace(/[^\d]/g, '');
+    
+    // İlk 2 rakamdan sonra otomatik / ekle
+    if (numbers.length >= 2) {
+      return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}`;
+    }
+    
+    return numbers;
+  };
+
+  const handleExpiryDateChange = (text: string) => {
+    // Ay değerini kontrol et (01-12 arası olmalı)
+    const month = parseInt(text.slice(0, 2));
+    if (text.length >= 2 && (month < 1 || month > 12)) {
+      Alert.alert('Hata', 'Lütfen geçerli bir ay giriniz (01-12)');
+      return;
+    }
+
+    const formatted = formatExpiryDate(text);
+    setNewCard({...newCard, expiryDate: formatted});
   };
 
   const renderCard = (card: any) => (
@@ -128,6 +154,7 @@ const PaymentMethods = () => {
             <TextInput
               style={styles.input}
               placeholder="Kart Numarası"
+              placeholderTextColor="#666"
               value={newCard.cardNumber}
               onChangeText={(text) => setNewCard({...newCard, cardNumber: text})}
               keyboardType="numeric"
@@ -137,6 +164,7 @@ const PaymentMethods = () => {
             <TextInput
               style={styles.input}
               placeholder="Kart Sahibi"
+              placeholderTextColor="#666"
               value={newCard.cardHolder}
               onChangeText={(text) => setNewCard({...newCard, cardHolder: text.toUpperCase()})}
             />
@@ -144,9 +172,20 @@ const PaymentMethods = () => {
             <TextInput
               style={styles.input}
               placeholder="Son Kullanma Tarihi (AA/YY)"
+              placeholderTextColor="#666"
               value={newCard.expiryDate}
-              onChangeText={(text) => setNewCard({...newCard, expiryDate: text})}
+              onChangeText={handleExpiryDateChange}
+              keyboardType="numeric"
               maxLength={5}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Güvenlik kodu (CVV)"
+              placeholderTextColor="#666"
+              value={newCard.cvv}
+              onChangeText={(text) => setNewCard({...newCard, cvv: text})}
+              keyboardType="numeric"
+              maxLength={3}
             />
 
             <View style={styles.modalButtons}>
@@ -287,6 +326,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 10,
     color: 'black',
+    fontSize: 16,
+    backgroundColor: '#FFFFFF',
   },
   modalButtons: {
     flexDirection: 'row',
