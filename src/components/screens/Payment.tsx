@@ -8,7 +8,7 @@ import { Alert, Image, Keyboard, Platform, StyleSheet, Text, TextInput, Touchabl
 import { ScrollView } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useCart } from '../../context/CartContext';
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<ParamListBase> }) => {
   React.useLayoutEffect(() => {
@@ -103,16 +103,26 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
     }
   };
 
-  const onChange = (e, selectedTime) => {
-    setTime(selectedTime);
-    setShow(false);
+  const onChange = (event: DateTimePickerEvent, selectedTime?: Date) => {
+    if (selectedTime) {
+      const hours = selectedTime.getHours();
+      if (hours >= 0 && hours < 9) {
+        Alert.alert('Uyarı', 'Lütfen uygun zamanı seçiniz.');
+      }
+      else{
+        setTime(selectedTime);
+      }
+      setShow(false);
+    }
   };
-   
-  
+
+
   const onShowMode = (modeToShow: 'date' | 'time') => {
-    setShow(true);
-    setMode(modeToShow);
-  } 
+    if(!show){
+      setShow(true);
+      setMode(modeToShow);
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -122,8 +132,8 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
           <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>Şimdi Gelsin</Text>
           </TouchableOpacity>
-          <View>
-            <TouchableOpacity style={styles.button} onPress={showMode => onShowMode('time')}>
+          <View style={styles.timePickerContainer}>
+            <TouchableOpacity style={styles.button} onPress={() => onShowMode('time')}>
               <Text style={styles.buttonText}>Teslimat Zamanını ayarla</Text>
             </TouchableOpacity>
 
@@ -355,6 +365,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 10,
     alignItems: 'center',
+  },
+  timePickerContainer: {
+    alignItems: 'center',
+    marginTop: 28,
   },
 });
 
