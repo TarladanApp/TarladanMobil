@@ -4,10 +4,11 @@ import CheckBox from '@react-native-community/checkbox';
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import Icon from 'react-native-vector-icons/Ionicons'; // İkon kütüphanesini ekleyin
-import { useCart } from '../../context/CartContext'; // Sepet verilerini almak için
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useCart } from '../../context/CartContext';
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<ParamListBase> }) => {
   React.useLayoutEffect(() => {
@@ -51,6 +52,9 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
   const { cartItems } = useCart(); // Sepet verilerini alın
   const [totalAmount, setTotalAmount] = useState(0); // Toplam tutar
   const [discountedAmount, setDiscountedAmount] = useState<number | null>(null);
+  const [time,setTime] = useState(new Date());
+  const [show,setShow] = useState(false);
+  const [mode, setMode] = useState<'date' | 'time'>('time');
 
   useEffect(() => {
     // Sepet toplamını hesaplayın
@@ -99,6 +103,17 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
     }
   };
 
+  const onChange = (e, selectedTime) => {
+    setTime(selectedTime);
+    setShow(false);
+  };
+   
+  
+  const onShowMode = (modeToShow: 'date' | 'time') => {
+    setShow(true);
+    setMode(modeToShow);
+  } 
+
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.container}>
@@ -107,9 +122,25 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
           <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>Şimdi Gelsin</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>Teslimat Zamanı Seç</Text>
-          </TouchableOpacity>
+          <View>
+            <TouchableOpacity style={styles.button} onPress={showMode => onShowMode('time')}>
+              <Text style={styles.buttonText}>Teslimat Zamanını ayarla</Text>
+            </TouchableOpacity>
+
+            {show && (
+              <DateTimePicker
+                value={time}
+                mode={mode}
+                is24Hour={true}
+                onChange={onChange}
+              />
+            )}
+
+            <Text style={styles.smalltimetext}>{time.toTimeString()}</Text>
+
+
+
+          </View>
         </View>
         <Text style={styles.title}>Ödeme Yöntemi</Text>
         <View style={styles.paymentOptions}>
@@ -219,6 +250,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
   },
+  smalltimetext: {
+    fontSize: 12,
+    color: 'black',
+    marginBottom: 10,
+  },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -240,6 +276,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     height: 50,
     justifyContent: 'center',
+    position: 'relative',
   },
   buttonText: {
     color: '#fff',
