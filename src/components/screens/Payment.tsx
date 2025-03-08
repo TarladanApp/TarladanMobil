@@ -55,6 +55,7 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
   const [time,setTime] = useState(new Date());
   const [show,setShow] = useState(false);
   const [mode, setMode] = useState<'date' | 'time'>('time');
+  const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<'now' | 'schedule'>('now');
 
   useEffect(() => {
     // Sepet toplamını hesaplayın
@@ -129,11 +130,26 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
       <View style={styles.container}>
         <Text style={styles.title}>Teslimat</Text>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button}>
+          <TouchableOpacity 
+            style={[
+              styles.button, 
+              selectedDeliveryOption === 'now' ? styles.selectedButton : styles.unselectedButton
+            ]}
+            onPress={() => setSelectedDeliveryOption('now')}
+          >
             <Text style={styles.buttonText}>Şimdi Gelsin</Text>
           </TouchableOpacity>
           <View style={styles.timePickerContainer}>
-            <TouchableOpacity style={styles.button} onPress={() => onShowMode('time')}>
+            <TouchableOpacity 
+              style={[
+                styles.button, 
+                selectedDeliveryOption === 'schedule' ? styles.selectedButton : styles.unselectedButton
+              ]}
+              onPress={() => {
+                setSelectedDeliveryOption('schedule');
+                onShowMode('time');
+              }}
+            >
               <Text style={styles.buttonText}>Teslimat Zamanını ayarla</Text>
             </TouchableOpacity>
 
@@ -147,9 +163,6 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
             )}
 
             <Text style={styles.smalltimetext}>{time.toTimeString()}</Text>
-
-
-
           </View>
         </View>
         <Text style={styles.title}>Ödeme Yöntemi</Text>
@@ -369,6 +382,12 @@ const styles = StyleSheet.create({
   timePickerContainer: {
     alignItems: 'center',
     marginTop: 28,
+  },
+  selectedButton: {
+    backgroundColor: '#4CAF50', // Seçili buton rengi
+  },
+  unselectedButton: {
+    backgroundColor: '#D3D3D3', // Gri tonlarında buton rengi
   },
 });
 
