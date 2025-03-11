@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable quotes */
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -18,6 +19,7 @@ import Profile from "./components/screens/Profile";
 import RegisterScreen from "./components/screens/RegisterScreen";
 import SavedAddresses from "./components/screens/SavedAddresses";
 import Settings from "./components/screens/Settings";
+import Splash from "./components/screens/Splash";
 import { CartProvider } from './context/CartContext';
 
 const Tab = createBottomTabNavigator();
@@ -28,15 +30,15 @@ const HomeStack = () => {
     <Stack.Navigator>
       <Stack.Screen name="HomeScreen" component={Home} options={{ headerShown: false }} />
       <Stack.Screen name="ProductDetails" component={ProductDetails}  />
-      <Stack.Screen 
-        name="FarmProfile" 
+      <Stack.Screen
+        name="FarmProfile"
         component={FarmProfile}
         options={{
           headerShown: false,
         }}
       />
-      <Stack.Screen 
-        name="Gallery" 
+      <Stack.Screen
+        name="Gallery"
         component={Gallery}
         options={{
           headerShown: true,
@@ -47,7 +49,7 @@ const HomeStack = () => {
         }}
       />
       <Stack.Screen 
-        name="Sertifikalar" 
+        name="Sertifikalar"
         component={Sertifikalar}
         options={{
           headerShown: true,
@@ -67,10 +69,10 @@ const CartStack = () =>{
   return (
     <Stack.Navigator>
       <Stack.Screen name="CartScreen" component={Cart} options={{ headerShown: false }} />
-      <Stack.Screen 
-        name="Payment" 
-        component={PaymentScreen} 
-        options={{ 
+      <Stack.Screen
+        name="Payment"
+        component={PaymentScreen}
+        options={{
           headerShown: true,
           title: 'Deniz Ev',
           headerStyle: {
@@ -81,6 +83,7 @@ const CartStack = () =>{
       />
       <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Adresses" component={SavedAddresses} options={{headerShown : false}} />
     </Stack.Navigator>
   );
 };
@@ -97,38 +100,55 @@ const ProfileStack = () => {
   );
 };
 
+
+const MainStack = () => {
+  return (
+    <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Splash" component={Splash} />
+      <Stack.Screen name="MainTabs" component={TabNavigator} />
+    </Stack.Navigator>
+  );
+};
+
+
+const TabNavigator = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarVisible:route.name !== 'Cart',
+        tabBarIcon: ({ focused }) => {
+          let iconSource;
+
+          if (route.name === "Home") {
+            iconSource = focused
+              ? require("./components/images/home.png")
+              : require("./components/images/home-outline.png");
+          } else if (route.name === "Cart") {
+            iconSource = focused
+              ? require("./components/images/cart.png")
+              : require("./components/images/cart-outline.png");
+          } else if (route.name === "Profile") {
+            iconSource = focused
+              ? require("./components/images/person.png")
+              : require("./components/images/person-outline.png");
+          }
+
+          return <Image source={iconSource} style={{ width: 20, height: 20 }} />;
+        }
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Anasayfa', headerShown: false }} />
+      <Tab.Screen name="Cart" component={CartStack} options={{ tabBarLabel: 'Sipariş Ver', headerShown: false }} />
+      <Tab.Screen name="Profile" component={ProfileStack} options={{ tabBarLabel: 'Hesabım', headerShown: false }} />
+    </Tab.Navigator>
+  );
+};
+
 const Router = () => {
   return (
     <CartProvider>
       <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            tabBarVisible:route.name !== 'Cart',
-            tabBarIcon: ({ focused }) => {
-              let iconSource;
-
-              if (route.name === "Home") {
-                iconSource = focused
-                  ? require("./components/images/home.png")
-                  : require("./components/images/home-outline.png");
-              } else if (route.name === "Cart") {
-                iconSource = focused
-                  ? require("./components/images/cart.png")
-                  : require("./components/images/cart-outline.png");
-              } else if (route.name === "Profile") {
-                iconSource = focused
-                  ? require("./components/images/person.png")
-                  : require("./components/images/person-outline.png");
-              }
-
-              return <Image source={iconSource} style={{ width: 20, height: 20 }} />;
-            }
-          })}
-        >
-          <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Anasayfa', headerShown: false }} />
-          <Tab.Screen name="Cart" component={CartStack} options={{ tabBarLabel: 'Sipariş Ver', headerShown: false }} />
-          <Tab.Screen name="Profile" component={ProfileStack} options={{ tabBarLabel: 'Hesabım', headerShown: false }} />
-        </Tab.Navigator>
+        <MainStack />
       </NavigationContainer>
     </CartProvider>
   );

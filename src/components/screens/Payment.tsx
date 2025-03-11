@@ -33,7 +33,7 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
       ),
       
       headerRight: () => (
-        <TouchableOpacity onPress={() => navigation.navigate('SavedAddresses')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Adresses')}>
           <Image
             source={require('../images/Vector.png')}
             style={{ width: 15, height: 15, marginRight: 10 }}
