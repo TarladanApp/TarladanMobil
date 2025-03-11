@@ -32,7 +32,7 @@ const ProductDetailsItem: React.FC<ProductDetailsItemProps> = ({
     <View style={[styles.item, productQuantities[item.id] ? styles.selectedItem : null]}>
       <View style={styles.content}>
         <Image
-          source={require('../images/hasan.jpeg')} 
+          source={require('../images/Salatalık.png')} 
           style={styles.image}
         />
         <View style={styles.details}>

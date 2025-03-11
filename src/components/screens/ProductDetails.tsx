@@ -87,7 +87,7 @@ const ProductDetails = () => {
         price: product.price,
         quantity: quantity,
         farm: product.farm,
-        image: require('../images/hasan.jpeg')
+        image: require('../images/star.png')
       };
 
       try {

@@ -43,42 +43,42 @@ const CartScreen = () => {
       id: 101,
       name: 'Organik Domates', 
       price: 24.99, 
-      image: require('../images/hasan.jpeg'),
+      image: require('../images/Domates.png'),
       farm: 'Yeşil Tarım Çiftliği'
     },
     { 
       id: 102,
       name: 'Sera Salatalığı', 
       price: 19.99, 
-      image: require('../images/hasan.jpeg'),
+      image: require('../images/Salatalık.png'),
       farm: 'Güneşin Doğuşu Çiftliği'
     },
     { 
       id: 103,
       name: 'Taze Erik', 
       price: 29.99, 
-      image: require('../images/hasan.jpeg'),
+      image: require('../images/Erik.png'),
       farm: 'Doğal Bereket Çiftliği'
     },
     { 
       id: 104,
       name: 'Çeri Domates', 
       price: 34.99, 
-      image: require('../images/hasan.jpeg'),
+      image: require('../images/Domates.png'),
       farm: 'Kırsal Lezzetler Çiftliği'
     },
     { 
       id: 105,
       name: 'Taze Fasulye', 
       price: 22.99, 
-      image: require('../images/hasan.jpeg'),
+      image: require('../images/fasulye.jpg'),
       farm: 'Anadolu Çiftliği'
     },
     { 
       id: 106,
       name: 'Organik Patlıcan', 
       price: 26.99, 
-      image: require('../images/hasan.jpeg'),
+      image: require('../images/Patlıcan.png'),
       farm: 'Bereket Bahçesi'
     }
   ];
