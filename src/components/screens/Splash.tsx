@@ -8,7 +8,11 @@ const Splash = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   const handleOrderPress = () => {
-    navigation.navigate('Register');
+    navigation.navigate('MainTabs');
+  };
+
+  const handleWorkWithUsPress = () => {
+    navigation.navigate('');
   };
 
   return (
@@ -40,9 +44,7 @@ const Splash = () => {
         <TouchableOpacity style={styles.buttonstyle} onPress={handleOrderPress}>
           <Text style={styles.buttontext}>Sipariş Ver</Text>
         </TouchableOpacity>
-      </View>
-      <View>
-        <Pressable style={styles.workwithusbutton}>
+        <Pressable style={styles.workwithusbutton} onPress={handleWorkWithUsPress}>
           <Text style={styles.workwithustext}>
             Bizimle Çalışmak ister misiniz?
           </Text>
@@ -69,22 +71,24 @@ const styles = StyleSheet.create({
     height: 70,
     resizeMode: 'contain',
     marginTop: 22,
-    marginLeft: 0,
+    marginLeft: 160,
   },
   imagestyle: {
     flex: 1.2,
     width: '100%',
   },
   textviewstyle: {
-    flex: 0.6,
+    flex: 0.5,
     flexWrap: 'wrap',
-    alignItems: 'flex-start',
-    margin: 10,
+    alignItems: 'center',
+    marginTop: 10,
+    marginLeft: 100,
   },
   buttonviewstyle: {
-    flex: 0.3,
+    flex: 0.4,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 10,
   },
   boldtext: {
     fontWeight: 'bold',
@@ -122,6 +126,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 15,
     color: '#202020',
+    marginBottom : 20,
   },
 });
 
