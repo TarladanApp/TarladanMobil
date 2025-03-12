@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable no-trailing-spaces */
 import { ParamListBase, RouteProp, useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState, useCallback } from 'react';
@@ -11,7 +12,6 @@ interface RouteParams {
     id: number;
     name: string;
     price: number;
-    // ... diğer product özellikleri
   };
 }
 
@@ -69,7 +69,7 @@ const ProductDetails = () => {
       setProductQuantities(prevQuantities => {
         const newQuantities = {
           ...prevQuantities,
-          [productId]: prevQuantities[productId] - 1
+          [productId]: prevQuantities[productId] - 1,
         };
         
         updateCartItems(productId, newQuantities[productId]);

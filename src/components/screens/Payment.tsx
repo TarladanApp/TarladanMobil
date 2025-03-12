@@ -9,6 +9,16 @@ import { ScrollView } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useCart } from '../../context/CartContext';
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+interface Card {
+  id: number;
+  cardNumber: string;
+  cardHolder: string;
+  expiryDate: string;
+  type: string;
+}
 
 const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<ParamListBase> }) => {
   React.useLayoutEffect(() => {
@@ -48,7 +58,7 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
   const [couponCode, setCouponCode] = useState('');
   const [isCouponValid, setIsCouponValid] = useState<boolean | null>(null);
   const [agreeTerms, setAgreeTerms] = useState(false);
-  
+
   const { cartItems } = useCart(); // Sepet verilerini alın
   const [totalAmount, setTotalAmount] = useState(0); // Toplam tutar
   const [discountedAmount, setDiscountedAmount] = useState<number | null>(null);
@@ -57,8 +67,42 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
   const [mode, setMode] = useState<'date' | 'time'>('time');
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState<'now' | 'schedule'>('now');
 
+  const [savedCards, setSavedCards] = useState<Card[]>([]);
+
   useEffect(() => {
-    // Sepet toplamını hesaplayın
+    const loadCards = async () => {
+      try {
+        const cardsData = await AsyncStorage.getItem('savedCards');
+        if (cardsData) {
+          setSavedCards(JSON.parse(cardsData));
+        } else {
+          const defaultCards = [
+            {
+              id: 1,
+              cardNumber: '**** **** **** 1234',
+              cardHolder: 'JOHN DOE',
+              expiryDate: '12/24',
+              type: 'Mastercard',
+            },
+            {
+              id: 2,
+              cardNumber: '**** **** **** 5678',
+              cardHolder: 'JOHN DOE',
+              expiryDate: '06/25',
+              type: 'Visa',
+            },
+          ];
+          setSavedCards(defaultCards);
+          await AsyncStorage.setItem('savedCards', JSON.stringify(defaultCards));
+        }
+      } catch (error) {
+        console.error('Kartları yükleme hatası:', error);
+      }
+    };
+    loadCards();
+  }, []);
+
+  useEffect(() => {
     const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     setTotalAmount(total);
   }, [cartItems]);
@@ -125,6 +169,7 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
     }
   };
 
+
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.container}>
@@ -165,38 +210,25 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
             <Text style={styles.smalltimetext}>{time.toTimeString()}</Text>
           </View>
         </View>
-        <Text style={styles.title}>Ödeme Yöntemi</Text>
+        <Text style={styles.title}>Kayıtlı Kartlarım</Text>
         <View style={styles.paymentOptions}>
-          <TouchableOpacity onPress={() => handlePaymentSelection('54XXX XXXX XXXX XXXX92 Ziraat Bankası')}>
-            <View style={styles.paymentOption}>
-              <CheckBox
-                value={selectedPayment === '54XXX XXXX XXXX XXXX92 Ziraat Bankası'}
-                onValueChange={() => handlePaymentSelection('54XXX XXXX XXXX XXXX92 Ziraat Bankası')}
-                style={styles.checkbox}
-              />
-              <Text style={styles.paymentOptionText}>54XXX XXXX XXXX XXXX92 Ziraat Bankası</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handlePaymentSelection('52XXX XXXX XXXX XXXX38 Yapı Kredi Bankası')}>
-            <View style={styles.paymentOption}>
-              <CheckBox
-                value={selectedPayment === '52XXX XXXX XXXX XXXX38 Yapı Kredi Bankası'}
-                onValueChange={() => handlePaymentSelection('52XXX XXXX XXXX XXXX38 Yapı Kredi Bankası')}
-                style={styles.checkbox}
-              />
-              <Text style={styles.paymentOptionText}>52XXX XXXX XXXX XXXX38 Yapı Kredi Bankası</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handlePaymentSelection('51XXX XXXX XXXX XXXX41 Enpara Kartı')}>
-            <View style={styles.paymentOption}>
-              <CheckBox
-                value={selectedPayment === '51XXX XXXX XXXX XXXX41 Enpara Kartı'}
-                onValueChange={() => handlePaymentSelection('51XXX XXXX XXXX XXXX41 Enpara Kartı')}
-                style={styles.checkbox}
-              />
-              <Text style={styles.paymentOptionText}>51XXX XXXX XXXX XXXX41 Enpara Kartı</Text>
-            </View>
-          </TouchableOpacity>
+          {savedCards.map((card) => (
+            <TouchableOpacity key={card.id} onPress={() => handlePaymentSelection(card.cardNumber)}>
+              <View style={styles.paymentOption}>
+                <CheckBox
+                  value={selectedPayment === card.cardNumber}
+                  onValueChange={() => handlePaymentSelection(card.cardNumber)}
+                  style={styles.checkbox}
+                />
+                <View style={styles.cardInfo}>
+                  <Text style={styles.paymentOptionText}>{card.cardHolder}</Text>
+                  <Text style={styles.paymentOptionText}>{card.cardNumber}</Text>
+                  <Text style={styles.cardDetails}>{card.type} • {card.expiryDate}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))}
+          <Text style={styles.title}>Diğer Ödeme Yöntemleri</Text>
           <TouchableOpacity onPress={() => handlePaymentSelection('Kapıda Nakit')}>
             <View style={styles.paymentOption}>
               <CheckBox
@@ -204,7 +236,7 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
                 onValueChange={() => handlePaymentSelection('Kapıda Nakit')}
                 style={styles.checkbox}
               />
-              <Text style={styles.paymentOptionText}>Kapıda Nakit</Text>
+              <Text style={styles.otherPaymentOptions}>Kapıda Nakit</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handlePaymentSelection('Kapıda Kredi / Banka Kartı')}>
@@ -214,7 +246,7 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
                 onValueChange={() => handlePaymentSelection('Kapıda Kredi / Banka Kartı')}
                 style={styles.checkbox}
               />
-              <Text style={styles.paymentOptionText}>Kapıda Kredi / Banka Kartı</Text>
+              <Text style={styles.otherPaymentOptions}>Kapıda Kredi / Banka Kartı</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handlePaymentSelection('Sodexo / Multinet / Setcard')}>
@@ -224,7 +256,7 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
                 onValueChange={() => handlePaymentSelection('Sodexo / Multinet / Setcard')}
                 style={styles.checkbox}
               />
-              <Text style={styles.paymentOptionText}>Sodexo / Multinet / Setcard</Text>
+              <Text style={styles.otherPaymentOptions}>Sodexo / Multinet / Setcard</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -322,7 +354,6 @@ const styles = StyleSheet.create({
   },
   paymentOptionText: {
     fontSize: 14,
-    marginLeft: 10,
     flex: 1,
     color: '#333',
     fontWeight: 'normal',
@@ -388,6 +419,22 @@ const styles = StyleSheet.create({
   },
   unselectedButton: {
     backgroundColor: '#D3D3D3', // Gri tonlarında buton rengi
+  },
+  cardInfo: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  cardDetails: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+  },
+  otherPaymentOptions :{
+      fontSize: 14,
+      flex: 1,
+      color: '#333',
+      fontWeight: 'normal',
+      marginLeft : 10,
   },
 });
 

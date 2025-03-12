@@ -1,8 +1,9 @@
 /* eslint-disable prettier/prettier */
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const PaymentMethods = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
@@ -31,6 +32,28 @@ const PaymentMethods = () => {
     },
   ]);
 
+  useEffect(() => {
+    const loadCards = async () => {
+      try {
+        const savedCards = await AsyncStorage.getItem('savedCards');
+        if (savedCards) {
+          setCards(JSON.parse(savedCards));
+        }
+      } catch (error) {
+        console.error('Kartları yükleme hatası:', error);
+      }
+    };
+    loadCards();
+  }, []);
+
+  const saveCardsToStorage = async (updatedCards: any[]) => {
+    try {
+      await AsyncStorage.setItem('savedCards', JSON.stringify(updatedCards));
+    } catch (error) {
+      console.error('Kartları kaydetme hatası:', error);
+    }
+  };
+
   const handleDeleteCard = (id: number) => {
     Alert.alert(
       'Kartı Sil',
@@ -43,7 +66,9 @@ const PaymentMethods = () => {
         {
           text: 'Sil',
           onPress: () => {
-            setCards(cards.filter(card => card.id !== id));
+            const updatedCards = cards.filter(card => card.id !== id);
+            setCards(updatedCards);
+            saveCardsToStorage(updatedCards);
           },
           style: 'destructive',
         },
@@ -62,7 +87,9 @@ const PaymentMethods = () => {
       ...newCard,
     };
 
-    setCards([...cards, newCardObj]);
+    const updatedCards = [...cards, newCardObj];
+    setCards(updatedCards);
+    saveCardsToStorage(updatedCards);
     setModalVisible(false);
     setNewCard({
       cardNumber: '',
@@ -76,13 +103,27 @@ const PaymentMethods = () => {
   const formatExpiryDate = (text: string) => {
     // Sadece rakamları al
     const numbers = text.replace(/[^\d]/g, '');
-    
+
     // İlk 2 rakamdan sonra otomatik / ekle
     if (numbers.length >= 2) {
       return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}`;
     }
-    
+
     return numbers;
+  };
+
+  const handleCardNumberChange = (text: string) => {
+    const numbers = text.replace(/[^\d]/g, '');
+
+    let formattedNumber = '';
+    for (let i = 0; i < numbers.length && i < 16; i++) {
+      if (i > 0 && i % 4 === 0) {
+        formattedNumber += ' ';
+      }
+      formattedNumber += numbers[i];
+    }
+
+    setNewCard({...newCard, cardNumber: formattedNumber});
   };
 
   const handleExpiryDateChange = (text: string) => {
@@ -96,6 +137,17 @@ const PaymentMethods = () => {
     const formatted = formatExpiryDate(text);
     setNewCard({...newCard, expiryDate: formatted});
   };
+
+
+  const handleCardHolderChange = (text: string) => {
+    const cardHolderValue = text.toUpperCase();
+
+    setNewCard(prevState => ({
+      ...prevState,
+      cardHolder: cardHolderValue,
+    }));
+  };
+
 
   const renderCard = (card: any) => (
     <View key={card.id} style={styles.cardItem}>
@@ -150,25 +202,24 @@ const PaymentMethods = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Yeni Kart Ekle</Text>
-            
             <TextInput
               style={styles.input}
               placeholder="Kart Numarası"
               placeholderTextColor="#666"
               value={newCard.cardNumber}
-              onChangeText={(text) => setNewCard({...newCard, cardNumber: text})}
+              onChangeText={handleCardNumberChange}
               keyboardType="numeric"
               maxLength={19}
             />
-            
             <TextInput
               style={styles.input}
               placeholder="Kart Sahibi"
               placeholderTextColor="#666"
               value={newCard.cardHolder}
-              onChangeText={(text) => setNewCard({...newCard, cardHolder: text.toUpperCase()})}
+              onChangeText={handleCardHolderChange}
+              autoCapitalize="characters"
+              autoCorrect={false}
             />
-            
             <TextInput
               style={styles.input}
               placeholder="Son Kullanma Tarihi (AA/YY)"
@@ -190,14 +241,13 @@ const PaymentMethods = () => {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity 
-                style={[styles.modalButton, styles.cancelButton]} 
+                style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setModalVisible(false)}
               >
                 <Text style={styles.modalButtonText}>İptal</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.saveButton]} 
+              <TouchableOpacity
+                style={[styles.modalButton, styles.saveButton]}
                 onPress={handleAddCard}
               >
                 <Text style={styles.modalButtonText}>Kaydet</Text>
