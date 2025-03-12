@@ -82,9 +82,17 @@ const PaymentMethods = () => {
       return;
     }
 
+    const cardNumberWithoutSpaces = newCard.cardNumber.replace(/\s/g, '');
+    const lastFourDigits = cardNumberWithoutSpaces.slice(-4);
+    const maskedCardNumber = `**** **** **** ${lastFourDigits}`;
+
     const newCardObj = {
       id: cards.length + 1,
-      ...newCard,
+      cardNumber: maskedCardNumber,
+      cardHolder: newCard.cardHolder,
+      expiryDate: newCard.expiryDate,
+      cvv: newCard.cvv,
+      type: 'Mastercard',
     };
 
     const updatedCards = [...cards, newCardObj];
