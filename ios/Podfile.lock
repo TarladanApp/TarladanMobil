@@ -1174,7 +1174,7 @@ PODS:
     - React-Core
   - RNCMaskedView (0.3.1):
     - React-Core
-  - RNDateTimePicker (8.0.1):
+  - RNDateTimePicker (8.3.0):
     - React-Core
   - RNGestureHandler (2.21.2):
     - DoubleConversion
@@ -1524,7 +1524,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: c91d753ede6dc21862c4922cd13f98f7cfde578e
   RNCCheckbox: 450ce156f3e29e25efa0315c96cfbabe5a39ded1
   RNCMaskedView: de80352547bd4f0d607bf6bab363d826822bd126
-  RNDateTimePicker: dde7ca9005d716f3efa9a63004b441679bca9a41
+  RNDateTimePicker: 29264364ea7b8cc0fb355b3843cf276a4ff78966
   RNGestureHandler: 8d857f8c5e6697585f6a246d1acbf0533c438ab1
   RNReanimated: b91f99db7e41b501dd71aab52fcc620118991f65
   RNScreens: a2d8a2555b4653d7a19706eb172f855657ac30d7

@@ -7,8 +7,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useEffect } from 'react';
-import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
 import { useCart } from '../../context/CartContext';
 
 interface CartItem {
@@ -31,6 +31,7 @@ interface RecommendedItem {
 const CartScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
   const { cartItems, updateCart } = useCart();
+  const [text, setText] = useState('');
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -151,6 +152,10 @@ const CartScreen = () => {
   const handleContinuePress = () => {
     navigation.navigate('Payment');
   };
+
+  const handleTextChange = useCallback((value: string) => {
+    setText(value);
+  }, []);
 
   const renderCartItem = ({ item }: { item: CartItem }) => (
     <View style={styles.item}>

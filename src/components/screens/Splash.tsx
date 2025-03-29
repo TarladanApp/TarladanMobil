@@ -1,8 +1,10 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
-import {View, Text, StyleSheet, Image, Pressable, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, Image, Pressable, TouchableOpacity, Dimensions} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+
+const { width, height } = Dimensions.get('window');
 
 const Splash = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -70,19 +72,18 @@ const styles = StyleSheet.create({
     width: 123,
     height: 70,
     resizeMode: 'contain',
-    marginTop: 22,
-    marginLeft: 160,
-  },
+    marginLeft:width/3,
+    marginTop: height/5,
+    },
   imagestyle: {
     flex: 1.2,
     width: '100%',
   },
   textviewstyle: {
-    flex: 0.5,
-    flexWrap: 'wrap',
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
-    marginLeft: 100,
+    paddingHorizontal: width * 0.05,
   },
   buttonviewstyle: {
     flex: 0.4,
@@ -91,9 +92,10 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   boldtext: {
+    fontSize: width * 0.06,
+    textAlign: 'center',
     fontWeight: 'bold',
     color: 'black',
-    fontSize: 32,
   },
   smalltext_mainmenu: {
     fontSize: 14,
@@ -129,5 +131,6 @@ const styles = StyleSheet.create({
     marginBottom : 20,
   },
 });
+
 
 export default Splash;
