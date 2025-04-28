@@ -15,6 +15,7 @@ import OrderHistory from "./components/screens/OrderHistory";
 import PaymentScreen from "./components/screens/Payment";
 import PaymentMethods from "./components/screens/PaymentMethods";
 import ProductDetails from "./components/screens/ProductDetails";
+import Products from "./components/screens/Products";
 import Profile from "./components/screens/Profile";
 import RegisterScreen from "./components/screens/RegisterScreen";
 import SavedAddresses from "./components/screens/SavedAddresses";
@@ -29,7 +30,8 @@ const HomeStack = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen name="HomeScreen" component={Home} options={{ headerShown: false }} />
-      <Stack.Screen name="ProductDetails" component={ProductDetails}  />
+      <Stack.Screen name="Products" component={Products} />
+      <Stack.Screen name="ProductDetails" component={ProductDetails} />
       <Stack.Screen
         name="FarmProfile"
         component={FarmProfile}
