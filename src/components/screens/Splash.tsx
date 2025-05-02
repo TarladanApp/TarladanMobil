@@ -1,13 +1,21 @@
 /* eslint-disable prettier/prettier */
-import React from 'react';
-import {View, Text, StyleSheet, Image, Pressable, TouchableOpacity, Dimensions} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useEffect } from 'react';
+import { Dimensions, Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 
 const { width, height } = Dimensions.get('window');
 
 const Splash = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      navigation.replace('MainTabs');
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   const handleOrderPress = () => {
     navigation.navigate('MainTabs');

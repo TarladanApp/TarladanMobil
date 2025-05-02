@@ -81,6 +81,11 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        externalNativeBuild {
+            cmake {
+                cppFlags ""
+            }
+        }
     }
     signingConfigs {
         debug {
@@ -100,6 +105,11 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+     externalNativeBuild {
+        cmake {
+            version "3.22.1" // ← Yüklü CMake sürümün buysa onu kullan
         }
     }
 }
