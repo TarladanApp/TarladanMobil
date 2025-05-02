@@ -1,20 +1,21 @@
 /* eslint-disable prettier/prettier */
-import { NavigationProp } from '@react-navigation/native';
 import React from "react";
 import { Dimensions, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import CustomButton from "../customComponents/CustomButton";
 import Produce from "../customComponents/Produce";
 import data from "../data.json";
 
-interface HomeProps {
-  navigation: NavigationProp<any>;
-}
-
 interface Item {
   u_id: number;
   name: string;
   imageUrl: string;
-  price?: number;
+  // Add other properties of the item here
+}
+
+import { NavigationProp } from '@react-navigation/native';
+
+interface HomeProps {
+  navigation: NavigationProp<any>;
 }
 
 function Home({ navigation }: HomeProps) {
@@ -33,28 +34,20 @@ function Home({ navigation }: HomeProps) {
           source={{ uri: "https://ideacdn.net/idea/ef/27/myassets/blogs/1.JPG?revision=1586724702" }} />
       </View>
 
-      <View style={styles.sectionHeader}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Text style={styles.text}>Kategoriler</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Products')}>
-          <Text style={styles.seeAllText}>Tümünü Gör</Text>
-        </TouchableOpacity>
+        <Text style={{ fontSize: 16, padding: 12, color: "black", fontWeight: "bold" }}>Tümünü Gör</Text>
       </View>
 
       <CustomButton />
-      
-      <View style={styles.sectionHeader}>
-        <Text style={styles.text}>Ürünler</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Products')}>
-          <Text style={styles.seeAllText}>Tümünü Gör</Text>
-        </TouchableOpacity>
-      </View>
-
+      <Text style={styles.text}>Ürünler</Text>
       <FlatList
         keyExtractor={item => item.u_id.toString()}
-        data={data.slice(0, 8)} // Sadece ilk 8 ürünü göster
+        data={data}
         renderItem={renderItem}
         numColumns={4}
       />
+
     </View>
   );
 }
@@ -66,18 +59,8 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 20,
-    color: "black",
-    fontWeight: "bold"
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-  },
-  seeAllText: {
-    fontSize: 16,
+    padding: 10,
+    paddingBottom: 0,
     color: "black",
     fontWeight: "bold"
   },
@@ -94,5 +77,4 @@ const styles = StyleSheet.create({
     paddingBottom: 20
   }
 });
-
 export default Home;

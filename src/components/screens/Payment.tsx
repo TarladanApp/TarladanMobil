@@ -1,15 +1,16 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import CheckBox from '@react-native-community/checkbox';
-import { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { ParamListBase } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, Keyboard, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useCart } from '../../context/CartContext';
+import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 interface Card {
   id: number;
@@ -18,52 +19,6 @@ interface Card {
   expiryDate: string;
   type: string;
 }
-
-interface DeliveryTimeSlot {
-  id: string;
-  time: string;
-  price: number;
-  available: boolean;
-}
-
-const TURKISH_DAYS = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-const TURKISH_MONTHS = [
-  'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
-];
-
-const formatDate = (date: Date): string => {
-  return `${date.getDate()} ${TURKISH_MONTHS[date.getMonth()]} ${TURKISH_DAYS[date.getDay()]}`;
-};
-
-const getDeliveryDates = () => {
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const dayAfter = new Date(today);
-  dayAfter.setDate(dayAfter.getDate() + 2);
-
-  return [
-    { 
-      id: 'today', 
-      label: 'Bugün',
-      date: today,
-      fullDate: formatDate(today)
-    },
-    { 
-      id: 'tomorrow', 
-      label: 'Yarın',
-      date: tomorrow,
-      fullDate: formatDate(tomorrow)
-    },
-    { 
-      id: 'dayAfter', 
-      label: TURKISH_DAYS[dayAfter.getDay()],
-      date: dayAfter,
-      fullDate: formatDate(dayAfter)
-    },
-  ];
-};
 
 const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<ParamListBase> }) => {
   React.useLayoutEffect(() => {
@@ -114,20 +69,6 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
 
   const [savedCards, setSavedCards] = useState<Card[]>([]);
 
-  const [showTimeModal, setShowTimeModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
-  const [deliveryDates, setDeliveryDates] = useState(getDeliveryDates());
-  const [selectedFullDate, setSelectedFullDate] = useState(formatDate(new Date()));
-
-  const timeSlots: DeliveryTimeSlot[] = [
-    { id: '1', time: '10:30 - 12:30', price: 26.99, available: false },
-    { id: '2', time: '12:30 - 14:30', price: 26.99, available: true },
-    { id: '3', time: '15:00 - 17:00', price: 26.99, available: true },
-    { id: '4', time: '17:00 - 19:00', price: 26.99, available: true },
-    { id: '5', time: '19:00 - 21:00', price: 26.99, available: true },
-  ];
-
   useEffect(() => {
     const loadCards = async () => {
       try {
@@ -165,28 +106,6 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
     const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     setTotalAmount(total);
   }, [cartItems]);
-
-  useEffect(() => {
-    // Gece yarısı geçtiğinde tarihleri güncelle
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    
-    const timeUntilMidnight = tomorrow.getTime() - now.getTime();
-    
-    const updateDates = () => {
-      setDeliveryDates(getDeliveryDates());
-      // İlk tarihi seç
-      const newDates = getDeliveryDates();
-      setSelectedDate(newDates[0].date);
-      setSelectedFullDate(newDates[0].fullDate);
-    };
-
-    const midnightTimer = setTimeout(updateDates, timeUntilMidnight);
-
-    return () => clearTimeout(midnightTimer);
-  }, []);
 
   const handlePaymentSelection = (paymentOption: string) => {
     setSelectedPayment(paymentOption);
@@ -250,21 +169,6 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
     }
   };
 
-  const handleDeliveryDateSelect = (dateId: string) => {
-    const selectedDateObj = deliveryDates.find(d => d.id === dateId);
-    if (selectedDateObj) {
-      setSelectedDate(selectedDateObj.date);
-      setSelectedFullDate(selectedDateObj.fullDate);
-    }
-  };
-
-  const handleTimeSlotSelect = (slotId: string) => {
-    setSelectedTimeSlot(slotId);
-    const slot = timeSlots.find(s => s.id === slotId);
-    if (slot) {
-      setTime(new Date(selectedDate.setHours(parseInt(slot.time.split(':')[0]))));
-    }
-  };
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -280,27 +184,30 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
           >
             <Text style={styles.buttonText}>Şimdi Gelsin</Text>
           </TouchableOpacity>
-          <View style={styles.scheduleContainer}>
+          <View style={styles.timePickerContainer}>
             <TouchableOpacity 
               style={[
-                styles.scheduleButton, 
+                styles.button, 
                 selectedDeliveryOption === 'schedule' ? styles.selectedButton : styles.unselectedButton
               ]}
               onPress={() => {
                 setSelectedDeliveryOption('schedule');
-                setShowTimeModal(true);
+                onShowMode('time');
               }}
             >
-              <Text style={styles.buttonText}>Teslimat Zamanını Seç</Text>
+              <Text style={styles.buttonText}>Teslimat Zamanını ayarla</Text>
             </TouchableOpacity>
-            {selectedDeliveryOption === 'schedule' && selectedTimeSlot && (
-              <View style={styles.selectedTimeContainer}>
-                <Icon name="time-outline" size={16} color="#2DB300" />
-                <Text style={styles.selectedTimeText}>
-                  {selectedFullDate} - {timeSlots.find(slot => slot.id === selectedTimeSlot)?.time}
-                </Text>
-              </View>
+
+            {show && (
+              <DateTimePicker
+                value={time}
+                mode={mode}
+                is24Hour={true}
+                onChange={onChange}
+              />
             )}
+
+            <Text style={styles.smalltimetext}>{time.toTimeString()}</Text>
           </View>
         </View>
         <Text style={styles.title}>Kayıtlı Kartlarım</Text>
@@ -387,111 +294,6 @@ const PaymentScreen = ({ navigation }: { navigation: NativeStackNavigationProp<P
           <Text style={styles.checkoutButtonText}>Ödeme Yap</Text>
           <Text style={styles.totalText}>₺{(discountedAmount ?? totalAmount).toFixed(2)}</Text>
         </View>
-
-        <Modal
-          visible={showTimeModal}
-          animationType="slide"
-          transparent={true}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Teslimat Zamanı Seç</Text>
-                <TouchableOpacity onPress={() => setShowTimeModal(false)}>
-                  <Icon name="close" size={24} color="#000" />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.deliveryTypeContainer}>
-                <Text style={styles.deliveryTypeTitle}>Randevulu Teslimat</Text>
-                <Image 
-                  source={require('../images/delivery-van.png')} 
-                  style={styles.deliveryIcon}
-                />
-              </View>
-
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateSelector}>
-                {deliveryDates.map((date) => (
-                  <TouchableOpacity
-                    key={date.id}
-                    style={[
-                      styles.dateButton,
-                      selectedDate.toDateString() === date.date.toDateString() && styles.selectedDateButton
-                    ]}
-                    onPress={() => handleDeliveryDateSelect(date.id)}
-                  >
-                    <Text style={[
-                      styles.dateButtonText,
-                      selectedDate.toDateString() === date.date.toDateString() && styles.selectedDateButtonText
-                    ]}>
-                      {date.label}
-                    </Text>
-                    <Text style={[
-                      styles.dateButtonSubText,
-                      selectedDate.toDateString() === date.date.toDateString() && styles.selectedDateButtonText
-                    ]}>
-                      {date.date.getDate()} {TURKISH_MONTHS[date.date.getMonth()]}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              <View style={styles.selectedDateContainer}>
-                <Icon name="calendar-outline" size={20} color="#2DB300" />
-                <Text style={styles.selectedDateText}>{selectedFullDate}</Text>
-              </View>
-
-              <View style={styles.timeSlotsContainer}>
-                {timeSlots.map((slot) => (
-                  <TouchableOpacity
-                    key={slot.id}
-                    style={[
-                      styles.timeSlotButton,
-                      !slot.available && styles.disabledTimeSlot,
-                      selectedTimeSlot === slot.id && styles.selectedTimeSlot
-                    ]}
-                    onPress={() => slot.available && handleTimeSlotSelect(slot.id)}
-                    disabled={!slot.available}
-                  >
-                    <Text style={[
-                      styles.timeSlotText,
-                      !slot.available && styles.disabledTimeSlotText,
-                      selectedTimeSlot === slot.id && styles.selectedTimeSlotText
-                    ]}>
-                      {slot.time}
-                    </Text>
-                    {!slot.available && (
-                      <Text style={styles.capacityText}>Kapasite Dolu</Text>
-                    )}
-                    {slot.available && (
-                      <Text style={styles.priceText}>{slot.price.toFixed(2)} TL</Text>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <View style={styles.quickDeliveryContainer}>
-                <Text style={styles.quickDeliveryTitle}>Hızlı Teslimat</Text>
-                <Text style={styles.quickDeliveryText}>
-                  Seçili bölgede hizmet verilmemektedir. Diğer kayıtlı adreslerinizi deneyebilirsiniz.
-                </Text>
-              </View>
-
-              <TouchableOpacity 
-                style={styles.confirmButton}
-                onPress={() => {
-                  if (selectedTimeSlot) {
-                    setShowTimeModal(false);
-                  } else {
-                    Alert.alert('Uyarı', 'Lütfen bir teslimat zamanı seçin.');
-                  }
-                }}
-              >
-                <Text style={styles.confirmButtonText}>Ödemeye Geç</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </View>
     </ScrollView>
   );
@@ -517,7 +319,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: 20,
     width: '100%',
   },
@@ -525,14 +327,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
     padding: 10,
     borderRadius: 5,
-    width: '48%',
+    flex: 1,
+    marginRight: 10,
     height: 50,
     justifyContent: 'center',
+    position: 'relative',
   },
   buttonText: {
     color: '#fff',
     textAlign: 'center',
-    fontSize: 15,
+    fontSize: 16,
   },
   paymentOptions: {
     marginBottom: 20,
@@ -631,181 +435,6 @@ const styles = StyleSheet.create({
       color: '#333',
       fontWeight: 'normal',
       marginLeft : 10,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    maxHeight: '100%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  deliveryTypeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    backgroundColor: '#F5F5F5',
-    padding: 15,
-    borderRadius: 10,
-  },
-  deliveryTypeTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    flex: 1,
-  },
-  deliveryIcon: {
-    width: 40,
-    height: 40,
-  },
-  dateSelector: {
-    flexDirection: 'row',
-    marginBottom: 20,
-  },
-  dateButton: {
-    padding: 10,
-    marginRight: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    alignItems: 'center',
-    minWidth: 80,
-  },
-  selectedDateButton: {
-    backgroundColor: '#2DB300',
-    borderColor: '#2DB300',
-  },
-  dateButtonText: {
-    fontSize: 14,
-    color: '#000',
-    marginBottom: 4,
-  },
-  dateButtonSubText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  selectedDateButtonText: {
-    color: 'white',
-  },
-  timeSlotsContainer: {
-    marginBottom: 20,
-  },
-  timeSlotButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    marginBottom: 10,
-  },
-  selectedTimeSlot: {
-    backgroundColor: '#2DB300',
-    borderColor: '#2DB300',
-  },
-  disabledTimeSlot: {
-    backgroundColor: '#F5F5F5',
-    borderColor: '#E0E0E0',
-  },
-  timeSlotText: {
-    fontSize: 14,
-    color: '#000',
-  },
-  selectedTimeSlotText: {
-    color: 'white',
-  },
-  disabledTimeSlotText: {
-    color: '#999',
-  },
-  capacityText: {
-    fontSize: 12,
-    color: '#999',
-  },
-  priceText: {
-    fontSize: 14,
-    color: '#2DB300',
-    fontWeight: 'bold',
-  },
-  quickDeliveryContainer: {
-    backgroundColor: '#F5F5F5',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  quickDeliveryTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 8,
-  },
-  quickDeliveryText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  confirmButton: {
-    backgroundColor: '#2DB300',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  confirmButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  selectedDateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 15,
-  },
-  selectedDateText: {
-    marginLeft: 8,
-    fontSize: 14,
-    color: '#2DB300',
-    fontWeight: '500',
-  },
-  scheduleContainer: {
-    width: '48%',
-  },
-  scheduleButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 5,
-    height: 50,
-    justifyContent: 'center',
-  },
-  selectedTimeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    padding: 8,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 5,
-  },
-  selectedTimeText: {
-    marginLeft: 8,
-    fontSize: 12,
-    color: '#2DB300',
-    flex: 1,
   },
 });
 
