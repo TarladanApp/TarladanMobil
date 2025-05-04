@@ -1,14 +1,48 @@
 /* eslint-disable prettier/prettier */
-import React from 'react';
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../../context/AuthContext';
 
 const LoginScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Hata', 'Lütfen e-posta ve şifrenizi giriniz.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+      console.log('Login attempt with:', { email }); // Şifreyi loglamıyoruz
+      const response = await login({ email, password });
+      console.log('Login response:', response);
+      navigation.navigate('Ana Sayfa');
+    } catch (error: any) {
+      console.error('Login error:', error.response?.data || error.message);
+      const errorMessage = error.response?.data?.message || 'Giriş başarısız. Lütfen bilgilerinizi kontrol edin.';
+      setError(errorMessage);
+      Alert.alert('Hata', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRegisterPress = () => {
-    navigation.navigate('Register'); // Register sayfasına yönlendirin
+    navigation.navigate('Register');
+  };
+
+  const handleForgotPassword = () => {
+    // Şifremi unuttum işlevselliği eklenecek
+    Alert.alert('Bilgi', 'Şifre sıfırlama bağlantısı e-posta adresinize gönderilecek.');
   };
 
   return (
@@ -17,24 +51,56 @@ const LoginScreen = () => {
       <TouchableOpacity onPress={handleRegisterPress}>
         <Text style={styles.prompt}>Üyeliğin yok mu?</Text>
       </TouchableOpacity>
-      <TextInput style={styles.input} placeholder="E-posta veya Cep Telefonu" />
-      <TextInput style={styles.input} placeholder="Şifre" secureTextEntry />
+      
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      
+      <TextInput 
+        style={styles.input} 
+        placeholder="E-posta veya Cep Telefonu" 
+        placeholderTextColor="#000000"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      
+      <TextInput 
+        style={styles.input} 
+        placeholder="Şifre" 
+        secureTextEntry 
+        placeholderTextColor="#000000"
+        value={password}
+        onChangeText={setPassword}
+        autoCapitalize="none"
+      />
+      
       <View style={styles.row}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleForgotPassword}>
           <Text style={styles.forgotPassword}>Şifremi unuttum</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.continueButton}>
-          <Text style={styles.continueButtonText}>Devam</Text>
+        <TouchableOpacity 
+          style={[styles.continueButton, loading && styles.disabledButton]} 
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.continueButtonText}>Devam</Text>
+          )}
         </TouchableOpacity>
       </View>
+
       <TouchableOpacity style={styles.googleButton}>
         <Image source={require('../images/googlelogo.png')} style={styles.icon} />
         <Text style={styles.googleButtonText}>Google ile devam et</Text>
       </TouchableOpacity>
+
       <TouchableOpacity style={styles.appleButton}>
         <Image source={require('../images/applelogo.png')} style={styles.icon} />
         <Text style={styles.appleButtonText}>Apple ile devam et</Text>
       </TouchableOpacity>
+
       <View style={styles.footer}>
         <Text style={styles.footerTitle}>tarla'dan</Text>
         <Text style={styles.footerSubtitle}>direkt evinize organik ve taze</Text>
@@ -69,6 +135,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 25,
     backgroundColor: '#f5f5f5',
+    color: '#000000',
     marginBottom: 10,
   },
   row: {
@@ -87,12 +154,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#2DB300',
     padding: 15,
     borderRadius: 25,
-    width: '33%', // Genişliği 3'te 1 olacak şekilde ayarlayın
+    width: '33%',
     alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#93c990',
   },
   continueButtonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  errorText: {
+    color: '#ff0000',
+    marginBottom: 10,
+    textAlign: 'center',
+    width: '100%',
   },
   googleButton: {
     flexDirection: 'row',

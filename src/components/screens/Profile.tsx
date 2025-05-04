@@ -1,17 +1,53 @@
 /* eslint-disable prettier/prettier */
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { userAPI } from '../../api/apiService';
+import { useAuth } from '../../context/AuthContext';
+
+interface UserProfile {
+  user_name: string;
+  user_surname: string;
+  user_mail: string;
+  user_phone_number: string;
+}
 
 const Profile = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
+  const { logout } = useAuth();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await userAPI.getProfile();
+      setUserProfile(response.user);
+    } catch (error) {
+      console.error('Kullanıcı bilgileri alınamadı:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, [navigation]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Çıkış yapılırken hata oluştu:', error);
+    }
+  };
 
   const menuItems = [
     {
@@ -53,6 +89,14 @@ const Profile = () => {
     </TouchableOpacity>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2DB300" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       {/* Custom Header */}
@@ -68,19 +112,41 @@ const Profile = () => {
           source={require('../images/person.png')} 
           style={styles.profileImage} 
         />
-        <Text style={styles.profileName}>Kullanıcı Adı</Text>
-        <Text style={styles.profileEmail}>kullanici@email.com</Text>
+        <Text style={styles.profileName}>
+          {userProfile ? `${userProfile.user_name} ${userProfile.user_surname}` : 'Yükleniyor...'}
+        </Text>
+        <Text style={styles.profileEmail}>
+          {userProfile ? userProfile.user_mail : 'Yükleniyor...'}
+        </Text>
+        <Text style={styles.profilePhone}>
+          {userProfile ? userProfile.user_phone_number : 'Yükleniyor...'}
+        </Text>
       </View>
 
       {/* Menu Items */}
       <View style={styles.menuContainer}>
         {menuItems.map(renderMenuItem)}
       </View>
+
+      {/* Logout Button */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Image 
+          source={require('../images/settings.png')} 
+          style={[styles.menuIcon, styles.logoutIcon]} 
+        />
+        <Text style={styles.logoutText}>Çıkış Yap</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
   container: {
     flex: 1,
     backgroundColor: 'white',
@@ -124,6 +190,11 @@ const styles = StyleSheet.create({
   profileEmail: {
     fontSize: 14,
     color: '#666',
+    marginBottom: 5,
+  },
+  profilePhone: {
+    fontSize: 14,
+    color: '#666',
   },
   menuContainer: {
     paddingTop: 20,
@@ -155,6 +226,25 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     tintColor: '#666',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF5F5',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    marginTop: 'auto',
+    marginBottom: 20,
+    marginHorizontal: 20,
+    borderRadius: 10,
+  },
+  logoutIcon: {
+    tintColor: '#FF4B4B',
+  },
+  logoutText: {
+    fontSize: 16,
+    color: '#FF4B4B',
+    fontWeight: 'bold',
   },
 });
 

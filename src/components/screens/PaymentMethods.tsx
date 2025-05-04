@@ -1,60 +1,51 @@
 /* eslint-disable prettier/prettier */
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { cardAPI } from '../../api/apiService';
+import { useAuth } from '../../context/AuthContext';
+
+interface Card {
+  card_id: number;
+  user_id: number;
+  user_card_name: string;
+  user_card_number: string;
+  user_card_ending_date: string;
+  user_card_code: string;
+}
 
 const PaymentMethods = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
+  const { user } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [newCard, setNewCard] = useState({
-    cardNumber: '',
-    cardHolder: '',
-    expiryDate: '',
-    cvv: '',
-    type: 'Mastercard',
+    user_card_name: '',
+    user_card_number: '',
+    user_card_ending_date: '',
+    user_card_code: '',
   });
-  const [cards, setCards] = useState([
-    {
-      id: 1,
-      cardNumber: '**** **** **** 1234',
-      cardHolder: 'JOHN DOE',
-      expiryDate: '12/24',
-      type: 'Mastercard',
-    },
-    {
-      id: 2,
-      cardNumber: '**** **** **** 5678',
-      cardHolder: 'JOHN DOE',
-      expiryDate: '06/25',
-      type: 'Visa',
-    },
-  ]);
+  const [cards, setCards] = useState<Card[]>([]);
 
   useEffect(() => {
-    const loadCards = async () => {
-      try {
-        const savedCards = await AsyncStorage.getItem('savedCards');
-        if (savedCards) {
-          setCards(JSON.parse(savedCards));
-        }
-      } catch (error) {
-        console.error('Kartları yükleme hatası:', error);
-      }
-    };
-    loadCards();
+    fetchCards();
   }, []);
 
-  const saveCardsToStorage = async (updatedCards: any[]) => {
+  const fetchCards = async () => {
     try {
-      await AsyncStorage.setItem('savedCards', JSON.stringify(updatedCards));
+      setLoading(true);
+      const response = await cardAPI.getCards();
+      setCards(response);
     } catch (error) {
-      console.error('Kartları kaydetme hatası:', error);
+      console.error('Kartları yükleme hatası:', error);
+      Alert.alert('Hata', 'Kartlar yüklenirken bir hata oluştu.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDeleteCard = (id: number) => {
+  const handleDeleteCard = async (cardId: number) => {
     Alert.alert(
       'Kartı Sil',
       'Bu kartı silmek istediğinize emin misiniz?',
@@ -65,10 +56,18 @@ const PaymentMethods = () => {
         },
         {
           text: 'Sil',
-          onPress: () => {
-            const updatedCards = cards.filter(card => card.id !== id);
-            setCards(updatedCards);
-            saveCardsToStorage(updatedCards);
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await cardAPI.deleteCard(cardId);
+              await fetchCards();
+              Alert.alert('Başarılı', 'Kart başarıyla silindi.');
+            } catch (error) {
+              console.error('Kart silme hatası:', error);
+              Alert.alert('Hata', 'Kart silinirken bir hata oluştu.');
+            } finally {
+              setLoading(false);
+            }
           },
           style: 'destructive',
         },
@@ -76,53 +75,45 @@ const PaymentMethods = () => {
     );
   };
 
-  const handleAddCard = () => {
-    if (!newCard.cardNumber || !newCard.cardHolder || !newCard.expiryDate) {
+  const handleAddCard = async () => {
+    if (!newCard.user_card_name || !newCard.user_card_number || !newCard.user_card_ending_date || !newCard.user_card_code) {
       Alert.alert('Hata', 'Lütfen tüm alanları doldurun');
       return;
     }
 
-    const cardNumberWithoutSpaces = newCard.cardNumber.replace(/\s/g, '');
-    const lastFourDigits = cardNumberWithoutSpaces.slice(-4);
-    const maskedCardNumber = `**** **** **** ${lastFourDigits}`;
-
-    const newCardObj = {
-      id: cards.length + 1,
-      cardNumber: maskedCardNumber,
-      cardHolder: newCard.cardHolder,
-      expiryDate: newCard.expiryDate,
-      cvv: newCard.cvv,
-      type: 'Mastercard',
-    };
-
-    const updatedCards = [...cards, newCardObj];
-    setCards(updatedCards);
-    saveCardsToStorage(updatedCards);
-    setModalVisible(false);
-    setNewCard({
-      cardNumber: '',
-      cardHolder: '',
-      expiryDate: '',
-      cvv: '',
-      type: 'Mastercard',
-    });
+    try {
+      setLoading(true);
+      await cardAPI.addCard({
+        ...newCard,
+        user_id: user?.id,
+      });
+      await fetchCards();
+      setModalVisible(false);
+      setNewCard({
+        user_card_name: '',
+        user_card_number: '',
+        user_card_ending_date: '',
+        user_card_code: '',
+      });
+      Alert.alert('Başarılı', 'Kart başarıyla eklendi.');
+    } catch (error) {
+      console.error('Kart ekleme hatası:', error);
+      Alert.alert('Hata', 'Kart eklenirken bir hata oluştu.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatExpiryDate = (text: string) => {
-    // Sadece rakamları al
     const numbers = text.replace(/[^\d]/g, '');
-
-    // İlk 2 rakamdan sonra otomatik / ekle
     if (numbers.length >= 2) {
       return `${numbers.slice(0, 2)}/${numbers.slice(2, 4)}`;
     }
-
     return numbers;
   };
 
   const handleCardNumberChange = (text: string) => {
     const numbers = text.replace(/[^\d]/g, '');
-
     let formattedNumber = '';
     for (let i = 0; i < numbers.length && i < 16; i++) {
       if (i > 0 && i % 4 === 0) {
@@ -130,51 +121,53 @@ const PaymentMethods = () => {
       }
       formattedNumber += numbers[i];
     }
-
-    setNewCard({...newCard, cardNumber: formattedNumber});
+    setNewCard({...newCard, user_card_number: formattedNumber});
   };
 
   const handleExpiryDateChange = (text: string) => {
-    // Ay değerini kontrol et (01-12 arası olmalı)
     const month = parseInt(text.slice(0, 2));
     if (text.length >= 2 && (month < 1 || month > 12)) {
       Alert.alert('Hata', 'Lütfen geçerli bir ay giriniz (01-12)');
       return;
     }
-
     const formatted = formatExpiryDate(text);
-    setNewCard({...newCard, expiryDate: formatted});
+    setNewCard({...newCard, user_card_ending_date: formatted});
   };
-
 
   const handleCardHolderChange = (text: string) => {
     const cardHolderValue = text.toUpperCase();
-
     setNewCard(prevState => ({
       ...prevState,
-      cardHolder: cardHolderValue,
+      user_card_name: cardHolderValue,
     }));
   };
 
-
-  const renderCard = (card: any) => (
-    <View key={card.id} style={styles.cardItem}>
+  const renderCard = (card: Card) => (
+    <View key={card.card_id} style={styles.cardItem}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardType}>{card.type}</Text>
-        <TouchableOpacity onPress={() => handleDeleteCard(card.id)}>
+        <Text style={styles.cardType}>{card.user_card_name}</Text>
+        <TouchableOpacity onPress={() => handleDeleteCard(card.card_id)}>
           <Image 
             source={require('../images/rubbish.png')} 
             style={styles.deleteIcon} 
           />
         </TouchableOpacity>
       </View>
-      <Text style={styles.cardNumber}>{card.cardNumber}</Text>
+      <Text style={styles.cardNumber}>{card.user_card_number}</Text>
       <View style={styles.cardFooter}>
-        <Text style={styles.cardHolder}>{card.cardHolder}</Text>
-        <Text style={styles.expiryDate}>{card.expiryDate}</Text>
+        <Text style={styles.cardHolder}>{card.user_card_name}</Text>
+        <Text style={styles.expiryDate}>{card.user_card_ending_date}</Text>
       </View>
     </View>
   );
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#2DB300" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -192,7 +185,11 @@ const PaymentMethods = () => {
 
       {/* Cards List */}
       <View style={styles.cardsContainer}>
-        {cards.map(renderCard)}
+        {cards.length === 0 ? (
+          <Text style={styles.noCardText}>Henüz kayıtlı kart bulunmamaktadır.</Text>
+        ) : (
+          cards.map(renderCard)
+        )}
       </View>
 
       {/* Add New Card Button */}
@@ -212,27 +209,27 @@ const PaymentMethods = () => {
             <Text style={styles.modalTitle}>Yeni Kart Ekle</Text>
             <TextInput
               style={styles.input}
-              placeholder="Kart Numarası"
+              placeholder="Kart Üzerindeki İsim"
               placeholderTextColor="#666"
-              value={newCard.cardNumber}
-              onChangeText={handleCardNumberChange}
-              keyboardType="numeric"
-              maxLength={19}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Kart Sahibi"
-              placeholderTextColor="#666"
-              value={newCard.cardHolder}
+              value={newCard.user_card_name}
               onChangeText={handleCardHolderChange}
               autoCapitalize="characters"
               autoCorrect={false}
             />
             <TextInput
               style={styles.input}
+              placeholder="Kart Numarası"
+              placeholderTextColor="#666"
+              value={newCard.user_card_number}
+              onChangeText={handleCardNumberChange}
+              keyboardType="numeric"
+              maxLength={19}
+            />
+            <TextInput
+              style={styles.input}
               placeholder="Son Kullanma Tarihi (AA/YY)"
               placeholderTextColor="#666"
-              value={newCard.expiryDate}
+              value={newCard.user_card_ending_date}
               onChangeText={handleExpiryDateChange}
               keyboardType="numeric"
               maxLength={5}
@@ -241,8 +238,8 @@ const PaymentMethods = () => {
               style={styles.input}
               placeholder="Güvenlik kodu (CVV)"
               placeholderTextColor="#666"
-              value={newCard.cvv}
-              onChangeText={(text) => setNewCard({...newCard, cvv: text})}
+              value={newCard.user_card_code}
+              onChangeText={(text) => setNewCard({...newCard, user_card_code: text})}
               keyboardType="numeric"
               maxLength={3}
             />
@@ -273,6 +270,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   header: {
     backgroundColor: '#2DB300',
     flexDirection: 'row',
@@ -301,6 +302,12 @@ const styles = StyleSheet.create({
   },
   cardsContainer: {
     padding: 20,
+  },
+  noCardText: {
+    textAlign: 'center',
+    color: '#666',
+    fontSize: 16,
+    marginTop: 20,
   },
   cardItem: {
     backgroundColor: '#F8F8F8',

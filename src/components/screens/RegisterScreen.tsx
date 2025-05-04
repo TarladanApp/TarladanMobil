@@ -1,14 +1,55 @@
 /* eslint-disable prettier/prettier */
-import React from 'react';
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../../context/AuthContext';
 
 const RegisterScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const { register } = useAuth();                           
+  const [formData, setFormData] = useState({
+    user_name: '',
+    user_surname: '',
+    user_mail: '',
+    user_phone_number: '',
+    user_birthday_date: '',
+    user_password: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleRegister = async () => {
+    // Form validasyonu
+    if (!formData.user_name || !formData.user_surname || !formData.user_mail || 
+        !formData.user_phone_number || !formData.user_birthday_date || !formData.user_password) {
+      Alert.alert('Hata', 'Lütfen tüm alanları doldurunuz.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+      console.log('Register attempt with:', { ...formData, password: '***' });
+      const response = await register(formData);
+      console.log('Register response:', response);
+      navigation.navigate('Ana Sayfa');
+    } catch (error: any) {
+      console.error('Register error:', error.response?.data || error.message);
+      const errorMessage = error.response?.data?.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.';
+      setError(errorMessage);
+      Alert.alert('Hata', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLoginPress = () => {
-    navigation.navigate('Login'); // Login sayfasına yönlendirin
+    navigation.navigate('Login');
+  };
+
+  const updateFormData = (key: string, value: string) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
   };
 
   return (
@@ -17,13 +58,67 @@ const RegisterScreen = () => {
       <TouchableOpacity onPress={handleLoginPress}>
         <Text style={styles.prompt}>Zaten üye misin?</Text>
       </TouchableOpacity>
-      <TextInput style={styles.input} placeholder="İsim" />
-      <TextInput style={styles.input} placeholder="Soyisim" />
-      <TextInput style={styles.input} placeholder="E-posta" />
-      <TextInput style={styles.input} placeholder="Cep Telefonu" />
-      <TextInput style={styles.input} placeholder="Doğum Tarihi" />
-      <TouchableOpacity style={styles.continueButton}>
-        <Text style={styles.continueButtonText}>Devam</Text>
+
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+      <TextInput 
+        style={styles.input} 
+        placeholder="İsim" 
+        placeholderTextColor="#000000"
+        value={formData.user_name}
+        onChangeText={(value) => updateFormData('user_name', value)}
+      />
+      <TextInput 
+        style={styles.input} 
+        placeholder="Soyisim" 
+        placeholderTextColor="#000000"
+        value={formData.user_surname}
+        onChangeText={(value) => updateFormData('user_surname', value)}
+      />
+      <TextInput 
+        style={styles.input} 
+        placeholder="E-posta" 
+        placeholderTextColor="#000000"
+        value={formData.user_mail}
+        onChangeText={(value) => updateFormData('user_mail', value)}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput 
+        style={styles.input} 
+        placeholder="Cep Telefonu" 
+        placeholderTextColor="#000000"
+        value={formData.user_phone_number}
+        onChangeText={(value) => updateFormData('user_phone_number', value)}
+        keyboardType="phone-pad"
+      />
+      <TextInput 
+        style={styles.input} 
+        placeholder="Doğum Tarihi" 
+        placeholderTextColor="#000000"
+        value={formData.user_birthday_date}
+        onChangeText={(value) => updateFormData('user_birthday_date', value)}
+      />
+      <TextInput 
+        style={styles.input} 
+        placeholder="Şifre" 
+        placeholderTextColor="#000000"
+        value={formData.user_password}
+        onChangeText={(value) => updateFormData('user_password', value)}
+        secureTextEntry
+        autoCapitalize="none"
+      />
+      
+      <TouchableOpacity 
+        style={[styles.continueButton, loading && styles.disabledButton]}
+        onPress={handleRegister}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" size="small" />
+        ) : (
+          <Text style={styles.continueButtonText}>Devam</Text>
+        )}
       </TouchableOpacity>
       <TouchableOpacity style={styles.googleButton}>
         <Image source={require('../images/googlelogo.png')} style={styles.icon} />
@@ -68,6 +163,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     backgroundColor: '#f5f5f5',
     marginBottom: 10,
+    color: '#000000',
   },
   continueButton: {
     backgroundColor: '#2DB300',
@@ -133,6 +229,15 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     marginTop: 10,
     color: '#757575',
+  },
+  errorText: {
+    color: '#ff0000',
+    marginBottom: 10,
+    textAlign: 'center',
+    width: '100%',
+  },
+  disabledButton: {
+    backgroundColor: '#93c990',
   },
 });
 

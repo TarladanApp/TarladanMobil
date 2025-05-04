@@ -4,7 +4,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from "react";
-import { Image } from "react-native";
 import Gallery from './components/customComponents/Gallery';
 import Cart from "./components/screens/Cart";
 import Sertifikalar from './components/screens/Certificate';
@@ -20,7 +19,7 @@ import Profile from "./components/screens/Profile";
 import RegisterScreen from "./components/screens/RegisterScreen";
 import SavedAddresses from "./components/screens/SavedAddresses";
 import Settings from "./components/screens/Settings";
-import Splash from "./components/screens/Splash";
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 
 const Tab = createBottomTabNavigator();
@@ -67,7 +66,7 @@ const HomeStack = () => {
   );
 };
 
-const CartStack = () =>{
+const CartStack = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen name="CartScreen" component={Cart} options={{ headerShown: false }} />
@@ -102,57 +101,38 @@ const ProfileStack = () => {
   );
 };
 
+const AppNavigator = () => {
+  const { isAuthenticated } = useAuth();
 
-const MainStack = () => {
   return (
-    <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Splash" component={Splash} />
-      <Stack.Screen name="MainTabs" component={TabNavigator} />
-    </Stack.Navigator>
-  );
-};
-
-
-const TabNavigator = () => {
-  return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarVisible:route.name !== 'Cart',
-        tabBarIcon: ({ focused }) => {
-          let iconSource;
-
-          if (route.name === "Home") {
-            iconSource = focused
-              ? require("./components/images/home.png")
-              : require("./components/images/home-outline.png");
-          } else if (route.name === "Cart") {
-            iconSource = focused
-              ? require("./components/images/cart.png")
-              : require("./components/images/cart-outline.png");
-          } else if (route.name === "Profile") {
-            iconSource = focused
-              ? require("./components/images/person.png")
-              : require("./components/images/person-outline.png");
-          }
-
-          return <Image source={iconSource} style={{ width: 20, height: 20 }} />;
-        }
-      })}
-    >
-      <Tab.Screen name="Home" component={HomeStack} options={{ tabBarLabel: 'Anasayfa', headerShown: false }} />
-      <Tab.Screen name="Cart" component={CartStack} options={{ tabBarLabel: 'Sipariş Ver', headerShown: false }} />
-      <Tab.Screen name="Profile" component={ProfileStack} options={{ tabBarLabel: 'Hesabım', headerShown: false }} />
+    <Tab.Navigator>
+      {!isAuthenticated ? (
+        // Auth stack
+        <>
+          <Tab.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Tab.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+        </>
+      ) : (
+        // App stack
+        <>
+          <Tab.Screen name="Ana Sayfa" component={HomeStack} options={{ headerShown: false }} />
+          <Tab.Screen name="Sepetim" component={CartStack} options={{ headerShown: false }} />
+          <Tab.Screen name="Profilim" component={ProfileStack} options={{ headerShown: false }} />
+        </>
+      )}
     </Tab.Navigator>
   );
 };
 
 const Router = () => {
   return (
-    <CartProvider>
-      <NavigationContainer>
-        <MainStack />
-      </NavigationContainer>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </CartProvider>
+    </AuthProvider>
   );
 };
 

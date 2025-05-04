@@ -1,58 +1,62 @@
 /* eslint-disable prettier/prettier */
 import { ParamListBase, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useLayoutEffect, useState } from 'react';
-import { Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { userAPI } from '../../api/apiService';
+
+interface Address {
+  user_address_id: number;
+  user_id: number;
+  full_address: string;
+  city: string;
+  district: string;
+  neighborhood: string;
+  street: string;
+  floor: number;
+  apartment: string;
+  isDefault?: boolean; // Frontend için ek alan
+}
 
 const SavedAddresses = () => {
   const navigation = useNavigation<NativeStackNavigationProp<ParamListBase>>();
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingAddress, setEditingAddress] = useState<any>(null);
-  const [newAddress, setNewAddress] = useState({
-    title: '',
-    address: '',
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [newAddress, setNewAddress] = useState<Omit<Address, 'user_address_id' | 'user_id'>>({
+    full_address: '',
     city: '',
     district: '',
     neighborhood: '',
     street: '',
-    buildingNo: '',
-    apartmentNo: '',
-    addressDetails: '',
+    floor: 0,
+    apartment: '',
     isDefault: false,
   });
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      title: 'Ev',
-      address: 'Atatürk Mahallesi, Cumhuriyet Caddesi No:123 D:4, Kadıköy/İstanbul',
-      city: 'İstanbul',
-      district: 'Kadıköy',
-      neighborhood: 'Atatürk',
-      street: 'Cumhuriyet Caddesi',
-      buildingNo: '123',
-      apartmentNo: '4',
-      addressDetails: '2. Kat',
-      isDefault: true,
-    },
-    {
-      id: 2,
-      title: 'İş',
-      address: 'Levent Mahallesi, İş Kuleleri No:45 Kat:12, Beşiktaş/İstanbul',
-      city: 'İstanbul',
-      district: 'Beşiktaş',
-      neighborhood: 'Levent',
-      street: 'İş Kuleleri Caddesi',
-      buildingNo: '45',
-      apartmentNo: '12',
-      addressDetails: 'B Blok',
-      isDefault: false,
-    },
-  ]);
+
+  useEffect(() => {
+    fetchAddresses();
+  }, []);
+
+  const fetchAddresses = async () => {
+    try {
+      setLoading(true);
+      const response = await userAPI.getAddresses();
+      console.log('Gelen adres verileri:', response); // Debug için
+      setAddresses(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.error('Adresler alınamadı:', error);
+      Alert.alert('Hata', 'Adresler yüklenirken bir hata oluştu.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useLayoutEffect(() => {
     const defaultAddress = addresses.find(addr => addr.isDefault);
     navigation.setOptions({
-      headerTitle: defaultAddress?.title || 'Kayıtlı Adreslerim',
+      headerTitle: defaultAddress ? `${defaultAddress.neighborhood}, ${defaultAddress.district}` : 'Kayıtlı Adreslerim',
       headerTitleAlign: 'center',
       headerTitleStyle: {
         color: 'white',
@@ -66,8 +70,8 @@ const SavedAddresses = () => {
     });
   }, [navigation, addresses]);
 
-  const handleDeleteAddress = (id: number) => {
-    const addressToDelete = addresses.find(addr => addr.id === id);
+  const handleDeleteAddress = async (id: number) => {
+    const addressToDelete = addresses.find(addr => addr.user_address_id === id);
     if (addressToDelete?.isDefault) {
       Alert.alert('Hata', 'Varsayılan adres silinemez.');
       return;
@@ -83,8 +87,14 @@ const SavedAddresses = () => {
         },
         {
           text: 'Sil',
-          onPress: () => {
-            setAddresses(addresses.filter(addr => addr.id !== id));
+          onPress: async () => {
+            try {
+              await userAPI.deleteAddress(id);
+              setAddresses(addresses.filter(addr => addr.user_address_id !== id));
+            } catch (error) {
+              console.error('Adres silinirken hata oluştu:', error);
+              Alert.alert('Hata', 'Adres silinirken bir hata oluştu.');
+            }
           },
           style: 'destructive',
         },
@@ -92,89 +102,93 @@ const SavedAddresses = () => {
     );
   };
 
-  const handleEditAddress = (address: any) => {
+  const handleEditAddress = (address: Address) => {
     setEditingAddress(address);
     setNewAddress({
-      title: address.title,
-      address: address.address,
+      full_address: address.full_address,
       city: address.city,
       district: address.district,
       neighborhood: address.neighborhood,
       street: address.street,
-      buildingNo: address.buildingNo,
-      apartmentNo: address.apartmentNo,
-      addressDetails: address.addressDetails,
+      floor: address.floor,
+      apartment: address.apartment,
       isDefault: address.isDefault,
     });
     setModalVisible(true);
   };
 
-  const handleSaveAddress = () => {
-    if (!newAddress.title || !newAddress.city || !newAddress.district || !newAddress.neighborhood || !newAddress.street) {
-      Alert.alert('Hata', 'Lütfen gerekli alanları doldurun (Başlık, İl, İlçe, Mahalle, Sokak)');
+  const handleSaveAddress = async () => {
+    if (!newAddress.city || !newAddress.district || !newAddress.neighborhood || !newAddress.street) {
+      Alert.alert('Hata', 'Lütfen gerekli alanları doldurun (İl, İlçe, Mahalle, Sokak)');
       return;
     }
 
-    // Tam adresi oluştur
-    const fullAddress = `${newAddress.neighborhood} Mah., ${newAddress.street}${newAddress.buildingNo ? ` No:${newAddress.buildingNo}` : ''}${newAddress.apartmentNo ? ` D:${newAddress.apartmentNo}` : ''}, ${newAddress.district}/${newAddress.city}${newAddress.addressDetails ? `\n${newAddress.addressDetails}` : ''}`;
+    try {
+      const fullAddress = `${newAddress.neighborhood} Mah., ${newAddress.street} No:${newAddress.apartment}, Kat:${newAddress.floor}, ${newAddress.district}/${newAddress.city}`;
+      const addressData = { ...newAddress, full_address: fullAddress };
 
-    if (editingAddress) {
-      setAddresses(addresses.map(addr => 
-        addr.id === editingAddress.id 
-          ? { ...addr, ...newAddress, address: fullAddress }
-          : addr
-      ));
-    } else {
-      const newAddressObj = {
-        id: addresses.length + 1,
-        ...newAddress,
-        address: fullAddress,
-      };
-      setAddresses([...addresses, newAddressObj]);
+      if (editingAddress) {
+        await userAPI.updateAddress(editingAddress.user_address_id, addressData);
+        setAddresses(addresses.map(addr => 
+          addr.user_address_id === editingAddress.user_address_id 
+            ? { ...addr, ...addressData }
+            : addr
+        ));
+      } else {
+        const response = await userAPI.addAddress(addressData);
+        setAddresses([...addresses, response]);
+      }
+
+      setModalVisible(false);
+      setEditingAddress(null);
+      setNewAddress({
+        full_address: '',
+        city: '',
+        district: '',
+        neighborhood: '',
+        street: '',
+        floor: 0,
+        apartment: '',
+        isDefault: false,
+      });
+    } catch (error) {
+      console.error('Adres kaydedilirken hata oluştu:', error);
+      Alert.alert('Hata', 'Adres kaydedilirken bir hata oluştu.');
     }
-
-    setModalVisible(false);
-    setEditingAddress(null);
-    setNewAddress({
-      title: '',
-      address: '',
-      city: '',
-      district: '',
-      neighborhood: '',
-      street: '',
-      buildingNo: '',
-      apartmentNo: '',
-      addressDetails: '',
-      isDefault: false,
-    });
   };
 
-  const handleSetDefault = (id: number) => {
-    setAddresses(addresses.map(addr => ({
-      ...addr,
-      isDefault: addr.id === id,
-    })));
+  const handleSetDefault = async (id: number) => {
+    try {
+      await userAPI.setDefaultAddress(id);
+      setAddresses(addresses.map(addr => ({
+        ...addr,
+        isDefault: addr.user_address_id === id,
+      })));
+    } catch (error) {
+      console.error('Varsayılan adres ayarlanırken hata oluştu:', error);
+      Alert.alert('Hata', 'Varsayılan adres ayarlanırken bir hata oluştu.');
+    }
   };
 
-  const renderAddress = (address: any) => (
-    <View key={address.id} style={styles.addressItem}>
+  const renderAddress = (address: Address) => (
+    <View key={address.user_address_id} style={styles.addressItem}>
       <View style={styles.addressHeader}>
         <View style={styles.titleContainer}>
-          <Text style={styles.addressTitle}>{address.title}</Text>
+          <Text style={styles.addressTitle}>{address.neighborhood}</Text>
           {address.isDefault && (
             <View style={styles.defaultBadge}>
               <Text style={styles.defaultText}>Varsayılan</Text>
             </View>
           )}
         </View>
-        <TouchableOpacity onPress={() => handleDeleteAddress(address.id)}>
+        <TouchableOpacity onPress={() => handleDeleteAddress(address.user_address_id)}>
           <Image 
             source={require('../images/rubbish.png')} 
             style={styles.deleteIcon} 
           />
         </TouchableOpacity>
       </View>
-      <Text style={styles.addressText}>{address.address}</Text>
+      <Text style={styles.addressText}>{address.full_address}</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
           style={styles.editButton}
@@ -185,7 +199,7 @@ const SavedAddresses = () => {
         {!address.isDefault && (
           <TouchableOpacity 
             style={styles.defaultButton}
-            onPress={() => handleSetDefault(address.id)}
+            onPress={() => handleSetDefault(address.user_address_id)}
           >
             <Text style={styles.defaultButtonText}>Varsayılan Yap</Text>
           </TouchableOpacity>
@@ -193,6 +207,14 @@ const SavedAddresses = () => {
       </View>
     </View>
   );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2DB300" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -210,7 +232,11 @@ const SavedAddresses = () => {
 
       {/* Addresses List */}
       <ScrollView style={styles.addressesContainer}>
-        {addresses.map(renderAddress)}
+        {addresses.length === 0 ? (
+          <Text style={styles.noAddressText}>Kayıtlı adres bulunamadı.</Text>
+        ) : (
+          addresses.map(renderAddress)
+        )}
       </ScrollView>
 
       {/* Add New Address Button */}
@@ -219,15 +245,13 @@ const SavedAddresses = () => {
         onPress={() => {
           setEditingAddress(null);
           setNewAddress({
-            title: '',
-            address: '',
+            full_address: '',
             city: '',
             district: '',
             neighborhood: '',
             street: '',
-            buildingNo: '',
-            apartmentNo: '',
-            addressDetails: '',
+            floor: 0,
+            apartment: '',
             isDefault: false,
           });
           setModalVisible(true);
@@ -253,14 +277,6 @@ const SavedAddresses = () => {
                 <Text style={styles.modalTitle}>
                   {editingAddress ? 'Adresi Düzenle' : 'Yeni Adres Ekle'}
                 </Text>
-                
-                <TextInput
-                  style={styles.input}
-                  placeholder="Adres Başlığı (Ev, İş vb.)"
-                  placeholderTextColor="#666"
-                  value={newAddress.title}
-                  onChangeText={(text) => setNewAddress({...newAddress, title: text})}
-                />
 
                 <TextInput
                   style={styles.input}
@@ -297,10 +313,10 @@ const SavedAddresses = () => {
                 <View style={styles.rowContainer}>
                   <TextInput
                     style={[styles.input, styles.halfInput]}
-                    placeholder="Bina No"
+                    placeholder="Kat"
                     placeholderTextColor="#666"
-                    value={newAddress.buildingNo}
-                    onChangeText={(text) => setNewAddress({...newAddress, buildingNo: text})}
+                    value={newAddress.floor.toString()}
+                    onChangeText={(text) => setNewAddress({...newAddress, floor: parseInt(text) || 0})}
                     keyboardType="numeric"
                   />
 
@@ -308,21 +324,10 @@ const SavedAddresses = () => {
                     style={[styles.input, styles.halfInput]}
                     placeholder="Daire No"
                     placeholderTextColor="#666"
-                    value={newAddress.apartmentNo}
-                    onChangeText={(text) => setNewAddress({...newAddress, apartmentNo: text})}
-                    keyboardType="numeric"
+                    value={newAddress.apartment}
+                    onChangeText={(text) => setNewAddress({...newAddress, apartment: text})}
                   />
                 </View>
-
-                <TextInput
-                  style={[styles.input, styles.addressInput]}
-                  placeholder="Adres Tarifi (Opsiyonel)"
-                  placeholderTextColor="#666"
-                  value={newAddress.addressDetails}
-                  onChangeText={(text) => setNewAddress({...newAddress, addressDetails: text})}
-                  multiline
-                  numberOfLines={3}
-                />
 
                 <TouchableOpacity 
                   style={styles.defaultCheckbox}
@@ -582,6 +587,17 @@ const styles = StyleSheet.create({
   },
   halfInput: {
     width: '48%',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noAddressText: {
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 20,
+    fontSize: 16,
   },
 });
 
